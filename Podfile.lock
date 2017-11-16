@@ -1,0 +1,35 @@
+PODS:
+  - BSGridCollectionViewLayout (1.2.0)
+  - BSImagePicker (2.7.0):
+    - BSGridCollectionViewLayout (~> 1.2.0)
+    - UIImageViewModeScaleAspect (= 1.5)
+  - ImagePalette (0.1.0):
+    - SwiftPriorityQueue (~> 1.1.2)
+  - OpalImagePicker (1.5.0)
+  - Realm (2.10.2):
+    - Realm/Headers (= 2.10.2)
+  - Realm/Headers (2.10.2)
+  - RealmSwift (2.10.2):
+    - Realm (= 2.10.2)
+  - SwiftPriorityQueue (1.1.2)
+  - UIImageViewModeScaleAspect (1.5)
+
+DEPENDENCIES:
+  - BSImagePicker (~> 2.4)
+  - ImagePalette (~> 0.1)
+  - OpalImagePicker
+  - RealmSwift
+
+SPEC CHECKSUMS:
+  BSGridCollectionViewLayout: 8f12c8e1e08c47057f5a39a6828f4395f043d78f
+  BSImagePicker: 0d8168ac5e24aef7dcbc8a185a6bdb5857ca9626
+  ImagePalette: f8e497636f8c2db4f5ff04a1372ce6b8a3fbb06a
+  OpalImagePicker: 0fb2caaa4386524eef1b7979aebebd3ad0a27ef1
+  Realm: 0ef72b837fb67e9f4b098bac771ddd72c7fdbb69
+  RealmSwift: 07a9ae0505091eda6b2ee7c190c3786d6e90a7b0
+  SwiftPriorityQueue: bafec150153c600a6b9f97b42abe25538745fadb
+  UIImageViewModeScaleAspect: 11a790a0b9d248a13dc63e3a78991f1463b6d84e
+
+PODFILE CHECKSUM: e5a2f603a75e1e275029814343cafe89c3800a0f
+
+COCOAPODS: 1.3.1
