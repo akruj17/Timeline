@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
@@ -301,12 +302,6 @@
                             <constraint firstItem="Wr1-BO-18l" firstAttribute="top" secondItem="M3t-pi-YSp" secondAttribute="bottom" constant="50" id="sek-qX-igP"/>
                             <constraint firstItem="nTE-vn-TIK" firstAttribute="top" secondItem="M3t-pi-YSp" secondAttribute="bottom" constant="10" id="xaK-4H-wgi"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="nTE-vn-TIK"/>
-                                <exclude reference="Wr1-BO-18l"/>
-                            </mask>
-                        </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Title" id="hDR-qU-sg2">
                         <leftBarButtonItems>

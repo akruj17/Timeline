@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import OpalImagePicker
 import BSImagePicker
 import Photos
 
@@ -17,7 +16,7 @@ protocol BackgroundModifierDelegate {
     func updateImageCache(imagePaths: [String])
 }
 
-class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, OpalImagePickerControllerDelegate, ImageLayoutDelegate {
+class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageLayoutDelegate {
 
     @IBOutlet weak var addToEnd: UIButton!
     @IBOutlet weak var addAfter: UIButton!
@@ -30,6 +29,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     var delegate: BackgroundModifierDelegate!
     var layout: BackgroundModifierLayout!
     var filePaths = [String]()
+    var cacheImages: CacheArray<Data>!
     
     @IBAction func item(_ sender: Any) {
         collectionView.reloadData()
@@ -82,6 +82,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
 //            filePaths.append(imagePath)
 //        }
         delegate.updateImageCache(imagePaths: filePaths)
+        cacheImages = CacheArray<Data>(beginningCounter: 0)
         
         //configure long press gestures
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(BackgroundModifierVC.handleLongGesture(_:)))
@@ -229,8 +230,13 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? BackgroundModifierImageCell {
-            let path = imgDirectory.appendingPathComponent("\(filePaths[indexPath.item])")
-            cell.imgView.image = resizeImage(image: UIImage(contentsOfFile: path)!)
+            if indexPath.item < cacheImages.beginningCounter {
+                let path = imgDirectory.appendingPathComponent("\(filePaths[indexPath.item])")
+                cell.imgView.image = resizeImage(image: UIImage(contentsOfFile: path)!)
+            } else {
+                cell.imgView.image = resizeImage(image: UIImage(data: cacheImages.cacheArray[indexPath.item - cacheImages.beginningCounter])!)
+            }
+            
             cell.didSelect = selectedStatuses[indexPath.item]
             cell.layer.zPosition = 100
             return cell
@@ -321,9 +327,15 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
 /////IMAGE INFO DELEGATE METHODS
     
     func getSizeAtIndexPath(indexPath: IndexPath) -> CGSize {
-        let searchPath = imgDirectory!.appendingPathComponent(filePaths[indexPath.item])
-        let tempImg = UIImage(contentsOfFile: searchPath)
-        return tempImg!.size
+        var tempImg: UIImage
+        if indexPath.item < cacheImages.beginningCounter {
+            let path = imgDirectory.appendingPathComponent("\(filePaths[indexPath.item])")
+            tempImg = UIImage(contentsOfFile: path)!
+        } else {
+            tempImg = UIImage(data: cacheImages.cacheArray[indexPath.item - cacheImages.beginningCounter])!
+        }
+
+        return tempImg.size
     }
     
     func setShouldRefresh() {
@@ -339,95 +351,81 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             cancel: nil,
             finish: {(assets) in
                 let photoManager = PHImageManager.default()
-                let fileManager = FileManager.default
-                
                 var counter = self.imageInfo?.value(forKey: IMAGE_COUNTER) as! Int
-                var paths = [IndexPath]()
-                
-                let backgroundThread = DispatchQueue.global(qos: .background)
+                var indexPaths = [IndexPath]()
                 let options = PHImageRequestOptions()
                 options.isSynchronous = true
+                for (index, asset) in assets.enumerated() {
+                    photoManager.requestImageData(for: asset, options: options, resultHandler: {(data, title, orientation, info) -> Void in
+                        let tempImage = UIImage(data: data!)
+                        let imageData = UIImageJPEGRepresentation(tempImage!, 0.9)
+                        let imagePath = "/image\(counter + index).jpg"
+                        self.cacheImages.cacheArray.append(imageData!)
+                        
+                        self.filePaths.insert(imagePath, at: self.insertionIndex + index)
+                        self.selectedStatuses.append(false)
+                        indexPaths.append(IndexPath(item: self.insertionIndex + index, section: 0))
+                    })
+                }
+                self.cacheImages.beginningCounter = counter
+                self.imageInfo.setValue(counter + assets.count, forKeyPath: IMAGE_COUNTER)
                 
-                backgroundThread.sync {
-                    for (index, asset) in assets.enumerated() {
-                        photoManager.requestImageData(for: asset, options: options, resultHandler: {(data, title, orientation, info) -> Void in
-                            let tempImage = UIImage(data: data!)
-                            let imageData = UIImageJPEGRepresentation(tempImage!, 0.9)
-                            
-                            let imagePath = "/image\(counter).jpg"
-                            let imageFile = self.imgDirectory.appendingPathComponent(imagePath)
-                            fileManager.createFile(atPath: imageFile, contents: imageData, attributes: nil)
-                            
-                            self.filePaths.insert(imagePath, at: self.insertionIndex + index)
-                            self.selectedStatuses.append(false)
-                            paths.append(IndexPath(item: self.insertionIndex + index, section: 0))
-                            
-                            counter += 1
-                        })
+                DispatchQueue.main.async {
+                    if self.insertionIndex != self.filePaths.count {
+                        let invalidationContext = BackgroundModifierInvalidationContext()
+                        invalidationContext.updateType = .insert
+                        invalidationContext.insertionCount = indexPaths.count
+                        invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
+                        self.layout.invalidateLayout(with: invalidationContext)
+                        self.reloadLayout(updateType: .insert)
                     }
-                    self.imageInfo.setValue(counter, forKeyPath: IMAGE_COUNTER)
+                    FileSystemOperator.saveImages(cachedImageData: self.cacheImages, imageDirectory: self.imgDirectory, startCounter: counter)
                 }
-                
-    
-                
-                if self.insertionIndex != self.filePaths.count {
-                    let invalidationContext = BackgroundModifierInvalidationContext()
-                    invalidationContext.updateType = .insert
-                    invalidationContext.insertionCount = paths.count
-                    invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
-                    self.layout.invalidateLayout(with: invalidationContext)
-                }
-                
-                DispatchQueue.main.sync {
-                    self.reloadLayout(updateType: .insert)
-                }
-                
-    
-        }, completion: {print("HERS CAR")})
+        }, completion: nil)
     }
     
     
     
-    func imagePicker(_ picker: OpalImagePickerController, didFinishPickingAssets assets: [PHAsset]) {
-        picker.dismiss(animated: true, completion: nil)
-    
-        let photoManager = PHImageManager.default()
-        let fileManager = FileManager.default
-        var counter = imageInfo?.value(forKey: IMAGE_COUNTER) as! Int
-        var paths = [IndexPath]()
-        
-        let backgroundThread = DispatchQueue.global(qos: .userInitiated)
-        let options = PHImageRequestOptions()
-        options.isSynchronous = true
-        
-        backgroundThread.sync {
-            for (index, asset) in assets.enumerated() {
-                photoManager.requestImageData(for: asset, options: options, resultHandler: {(data, title, orientation, info) -> Void in
-                    let tempImage = UIImage(data: data!)
-                    let imageData = UIImageJPEGRepresentation(tempImage!, 0.9)
-                    
-                    let imagePath = "/image\(counter).jpg"
-                    let imageFile = self.imgDirectory.appendingPathComponent(imagePath)
-                    fileManager.createFile(atPath: imageFile, contents: imageData, attributes: nil)
-                    
-                    self.filePaths.insert(imagePath, at: self.insertionIndex + index)
-                    self.selectedStatuses.append(false)
-                    paths.append(IndexPath(item: self.insertionIndex + index, section: 0))
-                    
-                    counter += 1
-                })
-            }
-            imageInfo.setValue(counter, forKeyPath: IMAGE_COUNTER)
-        }
-        
-        if self.insertionIndex != self.filePaths.count {
-            let invalidationContext = BackgroundModifierInvalidationContext()
-            invalidationContext.updateType = .insert
-            invalidationContext.insertionCount = paths.count
-            invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
-            self.layout.invalidateLayout(with: invalidationContext)
-        }
-                
-        self.reloadLayout(updateType: .insert)
-    }
+//    func imagePicker(_ picker: OpalImagePickerController, didFinishPickingAssets assets: [PHAsset]) {
+//        picker.dismiss(animated: true, completion: nil)
+//    
+//        let photoManager = PHImageManager.default()
+//        let fileManager = FileManager.default
+//        var counter = imageInfo?.value(forKey: IMAGE_COUNTER) as! Int
+//        var paths = [IndexPath]()
+//        
+//        let backgroundThread = DispatchQueue.global(qos: .userInitiated)
+//        let options = PHImageRequestOptions()
+//        options.isSynchronous = true
+//        
+//        backgroundThread.sync {
+//            for (index, asset) in assets.enumerated() {
+//                photoManager.requestImageData(for: asset, options: options, resultHandler: {(data, title, orientation, info) -> Void in
+//                    let tempImage = UIImage(data: data!)
+//                    let imageData = UIImageJPEGRepresentation(tempImage!, 0.9)
+//                    
+//                    let imagePath = "/image\(counter).jpg"
+//                    let imageFile = self.imgDirectory.appendingPathComponent(imagePath)
+//                    fileManager.createFile(atPath: imageFile, contents: imageData, attributes: nil)
+//                    
+//                    self.filePaths.insert(imagePath, at: self.insertionIndex + index)
+//                    self.selectedStatuses.append(false)
+//                    paths.append(IndexPath(item: self.insertionIndex + index, section: 0))
+//                    
+//                    counter += 1
+//                })
+//            }
+//            imageInfo.setValue(counter, forKeyPath: IMAGE_COUNTER)
+//        }
+//        
+//        if self.insertionIndex != self.filePaths.count {
+//            let invalidationContext = BackgroundModifierInvalidationContext()
+//            invalidationContext.updateType = .insert
+//            invalidationContext.insertionCount = paths.count
+//            invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
+//            self.layout.invalidateLayout(with: invalidationContext)
+//        }
+//                
+//        self.reloadLayout(updateType: .insert)
+//    }
 }

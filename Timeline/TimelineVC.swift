@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ImagePalette
 
 class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, BackgroundModifierDelegate, ImageLayoutDelegate {
 
@@ -165,7 +166,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             invalidationContext.invalidateImages = true
             layout.invalidateLayout(with: invalidationContext)
             collectionView.reloadData()
-     //       updateColorCache()
+            updateColorCache()
         }
         
     }
@@ -185,26 +186,26 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     
 /////HELPER METHODS
     
-//    func updateColorCache() {
-//        colorCache.removeAll()
-//        let eventLength = collectionView.frame.height * 0.9
-//        
-//        for path in imagePaths {
-//            let image = resizeImage(image: UIImage(contentsOfFile: imgDirectory.appendingPathComponent(path))!)
-//            let imageLength: CGFloat = image.size.width * 0.75
-//            
-//            var colorSwatch = UIColor.blue
-//            Palette.generateWith(configuration: PaletteConfiguration(image: image), queue: DispatchQueue.global(qos: .background)) {
-//                colorSwatch = $0.vibrantColor(defaultColor: UIColor.darkGray)
-//                var currentPosition: CGFloat = 0
-//                while currentPosition < imageLength {
-//                    self.colorCache.append(colorSwatch)
-//                    currentPosition += eventLength
-//                }
-//            }
-//        }
-//    }
-//    
+    func updateColorCache() {
+        colorCache.removeAll()
+        let eventLength = collectionView.frame.height * 0.9
+        
+        for path in imagePaths {
+            let image = resizeImage(image: UIImage(contentsOfFile: imgDirectory.appendingPathComponent(path))!)
+            let imageLength: CGFloat = image.size.width * 0.75
+            
+            var colorSwatch = UIColor.blue
+            Palette.generateWith(configuration: PaletteConfiguration(image: image), queue: DispatchQueue.global(qos: .background)) {
+                colorSwatch = $0.vibrantColor(defaultColor: UIColor.darkGray)
+                var currentPosition: CGFloat = 0
+                while currentPosition < imageLength {
+                    self.colorCache.append(colorSwatch)
+                    currentPosition += eventLength
+                }
+            }
+        }
+    }
+//
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation

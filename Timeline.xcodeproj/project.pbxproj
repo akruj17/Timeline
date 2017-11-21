@@ -23,6 +23,7 @@
 		A826E8E61F140D770050B625 /* TimelineLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A826E8E51F140D770050B625 /* TimelineLayout.swift */; };
 		A82D89561F095AFD00F769D7 /* EventEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89551F095AFD00F769D7 /* EventEditorCell.swift */; };
 		A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */; };
+		A8641F321FC3DC8F00058F6F /* CacheArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F311FC3DC8F00058F6F /* CacheArray.swift */; };
 		A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86790F01F7C65F700F025F4 /* RealmOperator.swift */; };
 		A875E9681F89439700AD70EA /* EventDetailedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A875E9671F89439700AD70EA /* EventDetailedVC.swift */; };
 		A8896D3B1F197D4500D62C0F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8896D3A1F197D4500D62C0F /* Event.swift */; };
@@ -53,6 +54,7 @@
 		A826E8E51F140D770050B625 /* TimelineLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineLayout.swift; sourceTree = "<group>"; };
 		A82D89551F095AFD00F769D7 /* EventEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventEditorCell.swift; sourceTree = "<group>"; };
 		A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineTitleEditorCell.swift; sourceTree = "<group>"; };
+		A8641F311FC3DC8F00058F6F /* CacheArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheArray.swift; sourceTree = "<group>"; };
 		A86790F01F7C65F700F025F4 /* RealmOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmOperator.swift; sourceTree = "<group>"; };
 		A875E9671F89439700AD70EA /* EventDetailedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailedVC.swift; sourceTree = "<group>"; };
 		A8896D3A1F197D4500D62C0F /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 				A8896D3A1F197D4500D62C0F /* Event.swift */,
 				A86790F01F7C65F700F025F4 /* RealmOperator.swift */,
 				A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */,
+				A8641F311FC3DC8F00058F6F /* CacheArray.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -278,7 +281,6 @@
 				"${BUILT_PRODUCTS_DIR}/BSGridCollectionViewLayout/BSGridCollectionViewLayout.framework",
 				"${BUILT_PRODUCTS_DIR}/BSImagePicker/BSImagePicker.framework",
 				"${BUILT_PRODUCTS_DIR}/ImagePalette/ImagePalette.framework",
-				"${BUILT_PRODUCTS_DIR}/OpalImagePicker/OpalImagePicker.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftPriorityQueue/SwiftPriorityQueue.framework",
@@ -289,7 +291,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BSGridCollectionViewLayout.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BSImagePicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ImagePalette.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpalImagePicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftPriorityQueue.framework",
@@ -358,6 +359,7 @@
 				A818455C1EF387C500F7BEFB /* AppDelegate.swift in Sources */,
 				A8009C061F2BF94300DD32C3 /* ImageCells.swift in Sources */,
 				A8896D3B1F197D4500D62C0F /* Event.swift in Sources */,
+				A8641F321FC3DC8F00058F6F /* CacheArray.swift in Sources */,
 				A8153E5B1EF6138B00A7B02D /* TimelineEventBox.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

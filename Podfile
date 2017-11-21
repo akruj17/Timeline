@@ -7,7 +7,6 @@ target 'Timeline' do
 
   # Pods for Timeline
   pod ‘RealmSwift’
-  pod ‘OpalImagePicker’
   pod “BSImagePicker", "~> 2.4"
   pod 'ImagePalette', '~> 0.1'
 
