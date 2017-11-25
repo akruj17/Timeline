@@ -43,22 +43,11 @@ class TimelineEventBox: UIView {
         }
         else {
             textView.font = UIFont(name: "AvenirNext-Regular", size: 25)
+            supplementalView = UIView()
+            supplementalFrame.size = CGSize(width: rect.width / 3, height: rect.height - boxHeight)
         }
         
         boxFrame.size = CGSize(width: rect.width, height: boxHeight)
-        
-        if isFirstOfYear {      // the supplemental view will be the year displayed
-            supplementalView = UILabel()
-            (supplementalView as! UILabel).text = String(describing: year!)
-            (supplementalView as! UILabel).font = UIFont(name: "AvenirNext-Bold", size: 32)
-            (supplementalView as! UILabel).textAlignment = .center
-            supplementalFrame.size = CGSize(width: rect.width, height: rect.height - boxHeight)
-        } else {               // the supplemental view will be a stick
-            supplementalView = UIView()
-            supplementalFrame.size = CGSize(width: 5, height: rect.height - boxHeight)
-            supplementalView.backgroundColor = color
-        }
-        
         if isTopRow {
             boxFrame.origin = CGPoint(x: 0, y: 0)
             supplementalFrame.origin = CGPoint(x: 0, y: boxHeight)
@@ -74,6 +63,39 @@ class TimelineEventBox: UIView {
         subFrame.origin = CGPoint(x: 0, y: 0)
         textView.frame = subFrame
         
+        if isFirstOfYear {  // the supplemental view will be the year displayed
+            let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.light)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = CGRect(x: 0, y: 0, width: supplementalFrame.width, height: supplementalFrame.height)
+            supplementalView.addSubview(blurEffectView)
+            supplementalView.layer.cornerRadius = 15
+            
+            // Vibrancy Effect
+            let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
+            let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
+            vibrancyEffectView.frame = blurEffectView.frame
+            
+            // Label for vibrant text
+            let vibrantLabel = UILabel()
+            vibrantLabel.text = String(describing: year!)
+            vibrantLabel.font = UIFont(name: "AvenirNext-Bold", size: 50)
+            vibrantLabel.sizeToFit()
+            vibrantLabel.textAlignment = .center
+            
+            // Add label to the vibrancy view
+            vibrantLabel.center.x = vibrancyEffectView.center.x
+            vibrantLabel.center.y = vibrancyEffectView.center.y
+            vibrancyEffectView.contentView.addSubview(vibrantLabel)
+            
+            
+            // Add the vibrancy view to the blur view
+            blurEffectView.contentView.addSubview(vibrancyEffectView)
+        } else {    // the supplemental view will be a stick
+            supplementalView.backgroundColor = color
+        }
+        
+
+        
         if !isTitleScreenEventBox && !alreadyConstructed {
             let blurEffect = UIBlurEffect(style: .light)
             let blurEffectView = UIVisualEffectView(effect: blurEffect)
@@ -86,6 +108,7 @@ class TimelineEventBox: UIView {
         eventBox.backgroundColor = UIColor.clear
         textView.backgroundColor = UIColor.clear
         textView.backgroundColor = UIColor.clear
+        supplementalView.backgroundColor = UIColor.clear
         textView.text = stringVal
         
         eventBox.layer.borderColor = color.cgColor

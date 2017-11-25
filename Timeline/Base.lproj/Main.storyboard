@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
-        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
@@ -729,7 +728,7 @@
                                 </constraints>
                             </stackView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Sly-wp-ncA">
-                                <rect key="frame" x="50" y="317.5" width="700" height="160"/>
+                                <rect key="frame" x="50" y="318" width="700" height="160"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="160" id="RBS-TB-Plc"/>
@@ -747,7 +746,7 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="107" height="95"/>
                                                 </imageView>
                                                 <imageView hidden="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="checkMark" translatesAutoresizingMaskIntoConstraints="NO" id="DMN-ig-ZSS">
-                                                    <rect key="frame" x="28.5" y="22.5" width="50" height="50"/>
+                                                    <rect key="frame" x="29" y="23" width="50" height="50"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="50" id="II1-Ep-bX4"/>
                                                         <constraint firstAttribute="width" constant="50" id="ZFe-qL-T1B"/>
@@ -772,7 +771,7 @@
                                 </cells>
                             </collectionView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hold and drag to reorder images.  " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zI4-IN-E0y">
-                                <rect key="frame" x="50" y="271" width="700" height="31.5"/>
+                                <rect key="frame" x="50" y="271" width="700" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="31.5" id="hSJ-DD-QfD"/>
                                 </constraints>
@@ -780,6 +779,39 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="apb-NX-t6b">
+                                <rect key="frame" x="362" y="202" width="75" height="75"/>
+                                <subviews>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uVY-5w-wwR">
+                                        <rect key="frame" x="0.0" y="0.0" width="75" height="75"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="g6S-dQ-30Y">
+                                            <rect key="frame" x="0.0" y="0.0" width="75" height="75"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </view>
+                                        <blurEffect style="light"/>
+                                    </visualEffectView>
+                                    <activityIndicatorView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="yJ8-hg-wFs">
+                                        <rect key="frame" x="0.5" y="0.5" width="75" height="75"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="75" id="Ykv-mV-UYh"/>
+                                            <constraint firstAttribute="width" constant="75" id="ftV-x3-gZi"/>
+                                        </constraints>
+                                        <color key="color" red="0.92549019610000005" green="0.41176470590000003" blue="0.32549019610000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="uVY-5w-wwR" secondAttribute="trailing" id="03Q-vc-72G"/>
+                                    <constraint firstItem="yJ8-hg-wFs" firstAttribute="centerY" secondItem="apb-NX-t6b" secondAttribute="centerY" id="D4V-eJ-Tdw"/>
+                                    <constraint firstAttribute="height" constant="75" id="IFy-Mh-4Rg"/>
+                                    <constraint firstAttribute="bottom" secondItem="uVY-5w-wwR" secondAttribute="bottom" id="Stk-dD-SEU"/>
+                                    <constraint firstItem="yJ8-hg-wFs" firstAttribute="centerX" secondItem="apb-NX-t6b" secondAttribute="centerX" id="drn-QA-rkr"/>
+                                    <constraint firstItem="uVY-5w-wwR" firstAttribute="leading" secondItem="apb-NX-t6b" secondAttribute="leading" id="kVb-kT-3fS"/>
+                                    <constraint firstItem="uVY-5w-wwR" firstAttribute="top" secondItem="apb-NX-t6b" secondAttribute="top" id="mjW-5X-Wwv"/>
+                                    <constraint firstAttribute="width" constant="75" id="phB-BL-vlh"/>
+                                </constraints>
+                            </view>
                             <navigationBar contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="G5H-KU-OfJ">
                                 <rect key="frame" x="0.0" y="0.0" width="800" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
@@ -818,11 +850,13 @@
                             <constraint firstItem="Sly-wp-ncA" firstAttribute="leading" secondItem="M86-px-oOe" secondAttribute="leading" id="KQe-Av-wES"/>
                             <constraint firstAttribute="trailing" secondItem="M86-px-oOe" secondAttribute="trailing" constant="50" id="LAo-px-1cu"/>
                             <constraint firstItem="M86-px-oOe" firstAttribute="leading" secondItem="642-rV-NaM" secondAttribute="leading" constant="50" id="cNK-O1-DfE"/>
+                            <constraint firstItem="apb-NX-t6b" firstAttribute="centerY" secondItem="642-rV-NaM" secondAttribute="centerY" id="ciE-th-gwy"/>
                             <constraint firstItem="zI4-IN-E0y" firstAttribute="leading" secondItem="642-rV-NaM" secondAttribute="leadingMargin" constant="30" id="grV-gu-7KN"/>
                             <constraint firstItem="bFn-T1-I7r" firstAttribute="trailing" secondItem="M86-px-oOe" secondAttribute="trailing" constant="-60" id="jaZ-bA-2gp"/>
                             <constraint firstItem="M2Z-iu-uyJ" firstAttribute="top" secondItem="e7Y-O4-kZk" secondAttribute="bottom" id="l4R-4G-znZ"/>
                             <constraint firstItem="Sly-wp-ncA" firstAttribute="top" secondItem="zI4-IN-E0y" secondAttribute="bottom" constant="15" id="o5m-9P-swZ"/>
                             <constraint firstItem="bFn-T1-I7r" firstAttribute="centerX" secondItem="642-rV-NaM" secondAttribute="centerX" id="oKE-xH-Mb0"/>
+                            <constraint firstItem="apb-NX-t6b" firstAttribute="centerX" secondItem="642-rV-NaM" secondAttribute="centerX" id="oW5-1L-H8A"/>
                             <constraint firstItem="bFn-T1-I7r" firstAttribute="leading" secondItem="M86-px-oOe" secondAttribute="leading" constant="60" id="qXK-D9-nXs"/>
                             <constraint firstItem="e7Y-O4-kZk" firstAttribute="top" secondItem="k2a-D1-NKU" secondAttribute="bottom" id="uLG-Qu-glO"/>
                             <constraint firstAttribute="trailingMargin" secondItem="zI4-IN-E0y" secondAttribute="trailing" constant="30" id="utw-5W-H4C"/>
@@ -831,8 +865,10 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="yJ8-hg-wFs" id="Sfg-8S-x81"/>
                         <outlet property="addAfter" destination="kaj-PA-PPO" id="o8h-XM-tre"/>
                         <outlet property="addToEnd" destination="KdS-2n-8GT" id="WhD-c1-o4H"/>
+                        <outlet property="blurView" destination="uVY-5w-wwR" id="3Ma-RD-o4J"/>
                         <outlet property="collectionView" destination="Sly-wp-ncA" id="TFv-JY-W0m"/>
                         <outlet property="delete" destination="EsP-NL-UP1" id="HxG-Zc-3Az"/>
                         <outlet property="lblMessage" destination="zI4-IN-E0y" id="L8w-DA-A6T"/>

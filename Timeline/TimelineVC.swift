@@ -10,6 +10,8 @@ import UIKit
 import RealmSwift
 import ImagePalette
 
+var collectionHeight: CGFloat!
+
 class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, BackgroundModifierDelegate, ImageLayoutDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView!
@@ -21,7 +23,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     var timeline: Timeline!
     var events: [Event]!
     var eventDetailedVC: EventDetailedVC!
-    var imagePaths = [String]()
+    var imageStatusesArray: [imageStatusTuple]!
     var colorCache = [UIColor]()
     var isInitialized = false
     var imgDirectory: NSString!
@@ -29,7 +31,12 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        //initialize variables
+        imageStatusesArray = [imageStatusTuple]()
+        if let layout = collectionView?.collectionViewLayout as? TimelineLayout {
+            self.layout = layout
+            self.layout.delegate = self
+        }
         collectionView.delegate = self
         collectionView.dataSource = self
         
@@ -37,15 +44,20 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             self.layout = layout
             self.layout.delegate = self
         }
+        //set the title to store the title of the timeline
         navBar.titleTextAttributes = [ NSAttributedStringKey.font: UIFont(name: "AvenirNext-Regular", size: 30)!, NSAttributedStringKey.foregroundColor: UIColor.darkGray]
+    
+        //store a reference to the image directory
+        let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+        imgDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(timeline.name)") as NSString
         
+        //set up properties of the container views
         backgroundModifierContainer.layer.borderColor = UIColor.lightGray.cgColor
         backgroundModifierContainer.layer.borderWidth = 2
         backgroundModifierContainer.layer.cornerRadius = 4
         
-        //store a reference to the image directory
-        let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-        imgDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(timeline.name)") as NSString
+        //initialize this global variable
+        collectionHeight = collectionView.frame.height
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -96,7 +108,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             return events.count
         }
         else if section == 1 {
-            return imagePaths.count
+            return imageStatusesArray.count
         }
         else {
             return 0
@@ -113,6 +125,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 var color: UIColor
                 if indexPath.item < colorCache.count {
                     color = colorCache[indexPath.item]
+                    print("\(color.components.red) \(color.components.green) \(color.components.blue)")
                 } else {
                     color = UIColor.gray
                 }
@@ -123,8 +136,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         }
         else if indexPath.section == 1 {
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? TimelineImageCell {
-                let path = imgDirectory.appendingPathComponent("\(imagePaths[indexPath.item])")
-                cell.imgView.image = resizeImage(image: UIImage(contentsOfFile: path)!)
+                cell.imgView.image = FileSystemOperator.resizeImage(image: UIImage(data: imageStatusesArray[indexPath.item].data)!, height: collectionHeight)
                 cell.layer.zPosition = 50
                 return cell
             }
@@ -141,16 +153,6 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         }
     }
     
-    func resizeImage(image: UIImage) -> UIImage {
-        let size = image.size
-        let scale = collectionView.frame.height / size.height
-        UIGraphicsBeginImageContext(CGSize(width: size.width * scale, height: size.height * scale))
-        image.draw(in: CGRect(x: 0, y: 0, width: size.width * scale, height: size.height * scale))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return newImage!
-    }
-    
     
 //////BACKGROUND MODIFIER DELEGATE METHODS
     
@@ -158,16 +160,20 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         return timeline.name
     }
     
-    func updateImageCache(imagePaths: [String]) {
-        self.imagePaths = imagePaths
-        
+    func updateBackgroundImages(imageStatuses: [imageStatusTuple]) {
+        self.imageStatusesArray = imageStatuses
+        // if the layout has already been created, it must be updated
         if layout != nil {
             let invalidationContext = TimelineInvalidationContext()
             invalidationContext.invalidateImages = true
             layout.invalidateLayout(with: invalidationContext)
-            collectionView.reloadData()
             updateColorCache()
+           // self.collectionView.reloadData()
+          //  self.collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+
         }
+        
+        //removeContainerView()
         
     }
     
@@ -179,9 +185,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
 /////IMAGE LAYOUT DELEGATE METHODS
     
     func getSizeAtIndexPath(indexPath: IndexPath) -> CGSize {
-        let searchPath = imgDirectory.appendingPathComponent(imagePaths[indexPath.item])
-        let tempImg = UIImage(contentsOfFile: searchPath)
-        return tempImg!.size
+        return imageStatusesArray[indexPath.item].largeSize
     }
     
 /////HELPER METHODS
@@ -190,19 +194,26 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         colorCache.removeAll()
         let eventLength = collectionView.frame.height * 0.9
         
-        for path in imagePaths {
-            let image = resizeImage(image: UIImage(contentsOfFile: imgDirectory.appendingPathComponent(path))!)
-            let imageLength: CGFloat = image.size.width * 0.75
-            
-            var colorSwatch = UIColor.blue
-            Palette.generateWith(configuration: PaletteConfiguration(image: image), queue: DispatchQueue.global(qos: .background)) {
+        for image in imageStatusesArray {
+            let imageLength: CGFloat = image.largeSize.width * 0.8
+            let im = UIImage(data: image.data)
+            var colorSwatch = UIColor.darkGray
+            Palette.generateWith(configuration: PaletteConfiguration(image: UIImage(data: image.data)!), completion: {[unowned self] in
+                var img = image
                 colorSwatch = $0.vibrantColor(defaultColor: UIColor.darkGray)
-                var currentPosition: CGFloat = 0
-                while currentPosition < imageLength {
-                    self.colorCache.append(colorSwatch)
-                    currentPosition += eventLength
-                }
-            }
+                //DispatchQueue.global(qos: .background).sync {[unowned self] in
+                    var currentPosition: CGFloat = 0
+                    while currentPosition < imageLength {
+                        self.colorCache.append(colorSwatch)
+                        currentPosition += eventLength
+                    }
+                    DispatchQueue.main.async {
+                        //self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
+                        self.collectionView.reloadData()
+                        self.removeContainerView()
+                    }
+              //  }
+            })
         }
     }
 //
@@ -232,4 +243,14 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
 
 protocol TimelineDataDelegate {
     func updateTitle(newTitle: Timeline);
+}
+
+extension UIColor {
+    var coreImageColor: CIColor {
+        return CIColor(color: self)
+    }
+    var components: (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
+        let coreImageColor = self.coreImageColor
+        return (coreImageColor.red, coreImageColor.green, coreImageColor.blue, coreImageColor.alpha)
+    }
 }

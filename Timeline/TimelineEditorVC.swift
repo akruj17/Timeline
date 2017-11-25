@@ -22,7 +22,6 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     var isNewTimeline = false
     var backgroundThread = DispatchQueue(label: "realmThread", qos: .userInitiated)
     var trashcanIcon: UIImage!
-    var dataDelegate: BackgroundModifierDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,7 +55,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     @IBAction func cancelPressed(_ sender: Any) {
         let warningAlert = UIAlertController(title: "Are you sure?", message: "Any edits will not be saved", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
-        let positiveAction = UIAlertAction(title: "Discard", style: .destructive) { action in
+        let positiveAction = UIAlertAction(title: "Discard", style: .destructive) { [unowned self] action in
             self.dismiss(animated: true, completion: nil)
         }
         warningAlert.addAction(cancelAction)
@@ -95,16 +94,21 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                     self.initializeNumRows(rows: 3 - eventInfoArray.count)
                 }
                 //present the alert on the main thread
-                DispatchQueue.main.async {
+                DispatchQueue.main.async(execute: { [unowned self] in
                     self.blurView.isHidden = true
                     self.indicatorView.stopAnimating()
                     self.present(incompleteAlert, animated: true, completion: self.tableView.reloadData)
-                }
+                })
+//                DispatchQueue.main.async {
+//                    self.blurView.isHidden = true
+//                    self.indicatorView.stopAnimating()
+//                    self.present(incompleteAlert, animated: true, completion: self.tableView.reloadData)
+//                }
             } else {
                 //At this point, the timeline is valid and will be saved in the Realm. Deleted
                 //events will be removed.
                 RealmOperator.saveToDatabase(events: eventInfoArray, timeline: self.timelineTitle)
-                DispatchQueue.main.async {
+                DispatchQueue.main.async(execute: { [unowned self] in
                     if self.isNewTimeline {
                         //Create directory for time line's images
                         FileSystemOperator.createImageDirectory(name: self.timelineTitle.name)
@@ -113,7 +117,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                         RealmOperator.deleteFromDatabase(events: self.deletedEvents)
                         self.dismiss(animated: true, completion: nil)
                     }
-                }
+                })
             }
         }
     }
@@ -161,7 +165,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let deleteButton = UITableViewRowAction(style: .normal, title: "                      ") { action, index in
+        let deleteButton = UITableViewRowAction(style: .normal, title: "                      ") { [unowned self] action, index in
             self.deletedEvents.append(self.eventInfoArray.remove(at: indexPath.item - 1))
             tableView.deleteRows(at: [indexPath], with: .fade)
         }

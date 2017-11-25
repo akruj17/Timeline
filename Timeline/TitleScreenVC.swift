@@ -40,7 +40,7 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     
     
     
-    var layout: TitleScrnLayout!
+    weak var layout: TitleScrnLayout!
     var collectionViewLoadedDetector = 0
     var timelineNames: Results<Timeline>?
     var indicator = UIActivityIndicatorView()

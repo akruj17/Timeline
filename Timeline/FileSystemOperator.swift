@@ -26,19 +26,42 @@ class FileSystemOperator {
         print("\(direc)")
     }
     
-    static func saveImages(cachedImageData: CacheArray<Data>, imageDirectory: NSString, startCounter: Int) {
+    
+    static func updateImagesInFileSystem(imageStatusData: [imageStatusTuple], imagePathsToDelete: [String], imageDirectory: NSString, startCounter: Int) {
         DispatchQueue.global(qos: .background).async {
-            autoreleasepool {
-            for (index, img) in cachedImageData.cacheArray.enumerated() {
-                let imagePath = "/image\(startCounter + index).jpg"
-                let imageFile = imageDirectory.appendingPathComponent(imagePath)
-                fileManager.createFile(atPath: imageFile, contents: img, attributes: nil)
-                cachedImageData.cacheArray.removeFirst()
-                cachedImageData.beginningCounter += 1
-                print("cOngrats you saved an image")
+            //first delete the images no longer needed...doing this first is a bit more efficient because the imagedirectory has fewer files
+            for path in imagePathsToDelete {
+                do {
+                    let imgPath = imageDirectory.appendingPathComponent("\(path)")
+                    try fileManager.removeItem(atPath: imgPath)
+                }
+                catch let error as NSError {
+                    fatalError()
+                }
             }
+            //Now add the images that need to be saved
+            for (index, image) in imageStatusData.enumerated() {
+                autoreleasepool {
+                    // if the image has not already been saved before, it will not already have a file path
+                    if image.filePath == nil {
+                        let imagePath = "/image\(startCounter + index).jpg"
+                        let imageFile = imageDirectory.appendingPathComponent(imagePath)
+                        fileManager.createFile(atPath: imageFile, contents: image.data, attributes: nil)
+                        print("cOngrats you saved an image")
+                    }
+                }
             }
         }
+    }
+    
+    static func resizeImage(image: UIImage, height: CGFloat) -> UIImage {
+        let size = image.size
+        let scale = height / size.height
+        UIGraphicsBeginImageContext(CGSize(width: size.width * scale, height: size.height * scale))
+        image.draw(in: CGRect(x: 0, y: 0, width: size.width * scale, height: size.height * scale))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage!
     }
 }
 

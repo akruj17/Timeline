@@ -388,6 +388,7 @@
 /* Begin XCBuildConfiguration section */
 		A818456B1EF387C500F7BEFB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1BAB4CCF50200FB65ABE1659 /* Pods-Timeline.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

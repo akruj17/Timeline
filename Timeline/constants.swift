@@ -6,7 +6,7 @@
 //  Copyright © 2017 Edumacation!. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 let TIMELINE_IMAGE_DIRECTORY = "TimelineImages"
 let IMAGE_INFO_PLIST = "imageInfo.plist"
@@ -15,11 +15,11 @@ let IMAGE_ORDERING_ARRAY = "imageOrderingArray"
 
 let TITLE_TIMELINE_PADDING = 120
 
-
-
 enum UpdateAction {
     case insert
     case delete
     case moveToFront
     case moveToEnd
 }
+
+typealias imageStatusTuple = (filePath: String?, data: Data, selectedStat: Bool, largeSize: CGSize)
