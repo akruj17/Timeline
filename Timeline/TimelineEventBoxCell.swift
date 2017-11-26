@@ -12,12 +12,9 @@ class TimelineEventBoxCell: UICollectionViewCell {
     
     @IBOutlet weak var timelineBox: TimelineEventBox!
     
-    func configure(isTopRow: Bool, title: String, color: UIColor, year: Int? = nil) {
-        if isTopRow {
-            timelineBox.isTopRow = true
-        } else {
-            timelineBox.isTopRow = false
-        }
+    func configure(isTopRow: Bool, title: String, color: UIColor, year: Int? = nil, isTitleScreenEventBox: Bool) {
+        timelineBox.isTopRow = isTopRow
+        timelineBox.isTitleScreenEventBox = isTitleScreenEventBox
         
         timelineBox.stringVal = title
         timelineBox.color = color

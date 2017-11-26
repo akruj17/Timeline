@@ -107,11 +107,9 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
             let isTopRow = indexPath.item % 2 == 0 ? true: false
             
             //Configure collectionview cells to appear as timeline objects. Last index has a special configuration to say "New Timeline"
-            if indexPath.item < timelineNames!.count {
-                cell.configure(isTopRow: isTopRow, title: timelineNames![indexPath.item].name, color: UIColor.darkGray)
-            } else {
-                cell.configure(isTopRow: isTopRow, title: "New Timeline", color: UIColor.darkGray)
-            }
+            var title = (indexPath.item < timelineNames!.count) ? timelineNames![indexPath.item].name : "New Timeline"
+            cell.configure(isTopRow: isTopRow, title: title, color: UIColor.red, isTitleScreenEventBox: true)
+            cell.layoutIfNeeded()
          //   cell.backgroundColor = UIColor.red
             return cell
         }

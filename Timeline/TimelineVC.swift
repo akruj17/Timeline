@@ -177,7 +177,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 } else {
                     color = UIColor.gray
                 }
-                cell.configure(isTopRow: isTopRow, title: events[indexPath.item].overview, color: color, year: firstYear)
+                cell.configure(isTopRow: isTopRow, title: events[indexPath.item].overview, color: color, year: firstYear, isTitleScreenEventBox: false)
                 cell.layer.zPosition = 100
                 return cell
             }
