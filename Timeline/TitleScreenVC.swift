@@ -125,17 +125,17 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
             performSegue(withIdentifier: "titleScrnToEditor", sender: nil)
         } else {
             //Present loading activity indicator while timeline loads
-            if let cell = collectionView.cellForItem(at: indexPath) as? TimelineEventBoxCell {
-                let eventBox = cell.timelineBox.eventBox
-                indicator.activityIndicatorViewStyle = .whiteLarge
-                indicator.color = UIColor.red
-                indicator.frame.size = CGSize(width: eventBox.frame.width, height: eventBox.frame.height)
-                indicator.frame.origin = CGPoint(x: 0, y: 0)
-                indicator.backgroundColor = UIColor.white
-                cell.timelineBox.eventBox.addSubview(indicator)
-                self.indicator.startAnimating()
+//            if let cell = collectionView.cellForItem(at: indexPath) as? TimelineEventBoxCell {
+//                let eventBox = cell.timelineBox.eventBox
+//                indicator.activityIndicatorViewStyle = .whiteLarge
+//                indicator.color = UIColor.red
+//                indicator.frame.size = CGSize(width: eventBox.frame.width, height: eventBox.frame.height)
+//                indicator.frame.origin = CGPoint(x: 0, y: 0)
+//                indicator.backgroundColor = UIColor.white
+//                cell.timelineBox.eventBox.addSubview(indicator)
+//                self.indicator.startAnimating()
                 performSegue(withIdentifier: "titleScrnToTimeline", sender: indexPath.item)
-            }
+//            }
             
 
         }
@@ -150,10 +150,10 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
         } else if segue.identifier == "titleScrnToTimeline" {
             if let timelineVC = segue.destination as? TimelineVC {
                 let timelineName = timelineNames![sender as! Int]
-                //timelineVC.timeline = timelineName.copy() as! Timeline
-                let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timelineName.name)
-                timelineVC.events = tuple.0
-                timelineVC.timeline = tuple.1
+                timelineVC.timeline = timelineName.copy() as! Timeline
+//                let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timelineName.name)
+//                timelineVC.events = tuple.0
+//                timelineVC.timeline = tuple.1
             }
         }
     }

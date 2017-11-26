@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
@@ -50,7 +51,7 @@
                                 <rect key="frame" x="140" y="371" width="744" height="317"/>
                                 <subviews>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="QbN-Lm-FDE">
-                                        <rect key="frame" x="0.0" y="0.0" width="744" height="317"/>
+                                        <rect key="frame" x="0.0" y="0.5" width="744" height="317"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <collectionViewLayout key="collectionViewLayout" id="xji-MV-TpJ" customClass="TitleScrnLayout" customModule="Timeline" customModuleProvider="target"/>
                                         <cells>
@@ -146,7 +147,7 @@
             </objects>
             <point key="canvasLocation" x="141.2109375" y="31.25"/>
         </scene>
-        <!--Title-->
+        <!--TimelineVC-->
         <scene sceneID="JZV-VI-VBn">
             <objects>
                 <viewController id="Wuk-cf-S2f" customClass="TimelineVC" customModule="Timeline" customModuleProvider="target" sceneMemberID="viewController">
@@ -236,10 +237,10 @@
                                     <constraint firstAttribute="trailing" secondItem="U7g-ao-Gnm" secondAttribute="trailing" id="xWY-IU-iRE"/>
                                 </constraints>
                             </view>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M3t-pi-YSp">
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M3t-pi-YSp" customClass="customNavBar" customModule="Timeline" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="1024" height="60"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="60" id="q20-Px-Rlj"/>
+                                    <constraint firstAttribute="height" constant="60" id="PoN-dx-FpI"/>
                                 </constraints>
                                 <items>
                                     <navigationItem title="Timeline" id="IhW-y6-fyc">
@@ -256,17 +257,61 @@
                                             </barButtonItem>
                                         </leftBarButtonItems>
                                         <rightBarButtonItems>
+                                            <barButtonItem systemItem="add" id="0K5-Al-50u"/>
+                                            <barButtonItem systemItem="save" id="o8x-L6-fAG"/>
                                             <barButtonItem image="background" style="done" id="XAH-BY-wJa">
                                                 <connections>
                                                     <action selector="modifyBackgroundPressed:" destination="Wuk-cf-S2f" id="6l6-g4-gVD"/>
                                                 </connections>
                                             </barButtonItem>
-                                            <barButtonItem systemItem="add" id="0K5-Al-50u"/>
-                                            <barButtonItem systemItem="cancel" id="o8x-L6-fAG"/>
                                         </rightBarButtonItems>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B2J-7n-ErO">
+                                <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                                <subviews>
+                                    <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="C3H-9d-lEh">
+                                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="fV9-Yw-JCI">
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Make sure to hit the save button a bunch of times before quitting!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="5Te-Qi-8Mb">
+                                                    <rect key="frame" x="0.0" y="413" width="1024" height="44"/>
+                                                    <fontDescription key="fontDescription" name="AvenirNext-UltraLight" family="Avenir Next" pointSize="32"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="5Te-Qi-8Mb" secondAttribute="trailing" id="5Oh-Ho-5RU"/>
+                                                <constraint firstItem="5Te-Qi-8Mb" firstAttribute="leading" secondItem="fV9-Yw-JCI" secondAttribute="leading" id="cjM-Wj-5yA"/>
+                                            </constraints>
+                                        </view>
+                                        <blurEffect style="light"/>
+                                    </visualEffectView>
+                                    <activityIndicatorView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="OKv-K2-KXt">
+                                        <rect key="frame" x="487" y="359" width="50" height="50"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="50" id="ht7-O3-Z0L"/>
+                                            <constraint firstAttribute="height" constant="50" id="oRQ-Xq-crB"/>
+                                        </constraints>
+                                        <color key="color" red="0.92549019610000005" green="0.41176470590000003" blue="0.32549019610000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="C3H-9d-lEh" secondAttribute="trailing" id="4Oe-gD-fFy"/>
+                                    <constraint firstItem="OKv-K2-KXt" firstAttribute="centerY" secondItem="B2J-7n-ErO" secondAttribute="centerY" id="BUR-t9-0Iq"/>
+                                    <constraint firstItem="5Te-Qi-8Mb" firstAttribute="top" secondItem="OKv-K2-KXt" secondAttribute="bottom" constant="4" id="EYN-Gf-lXn"/>
+                                    <constraint firstItem="C3H-9d-lEh" firstAttribute="top" secondItem="B2J-7n-ErO" secondAttribute="top" id="Qs6-aG-IYn"/>
+                                    <constraint firstItem="OKv-K2-KXt" firstAttribute="centerX" secondItem="B2J-7n-ErO" secondAttribute="centerX" id="gwU-Gf-6vb"/>
+                                    <constraint firstItem="C3H-9d-lEh" firstAttribute="leading" secondItem="B2J-7n-ErO" secondAttribute="leading" id="k6T-rJ-BKY"/>
+                                    <constraint firstAttribute="bottom" secondItem="C3H-9d-lEh" secondAttribute="bottom" id="u8v-dD-uGP"/>
+                                </constraints>
+                            </view>
                             <containerView hidden="YES" opaque="NO" alpha="0.80000000000000004" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nTE-vn-TIK">
                                 <rect key="frame" x="112" y="70" width="800" height="480"/>
                                 <constraints>
@@ -296,22 +341,28 @@
                             <constraint firstItem="M3t-pi-YSp" firstAttribute="top" secondItem="ZNG-2r-rGR" secondAttribute="top" id="V9r-gA-1sn"/>
                             <constraint firstAttribute="trailing" secondItem="M3t-pi-YSp" secondAttribute="trailing" id="bY0-T6-HBO"/>
                             <constraint firstItem="M3t-pi-YSp" firstAttribute="leading" secondItem="ZNG-2r-rGR" secondAttribute="leading" id="ccV-ni-V79"/>
+                            <constraint firstItem="B2J-7n-ErO" firstAttribute="top" secondItem="ZNG-2r-rGR" secondAttribute="top" id="hfD-g2-9we"/>
+                            <constraint firstAttribute="trailing" secondItem="B2J-7n-ErO" secondAttribute="trailing" id="i6Q-g6-xuN"/>
+                            <constraint firstItem="B2J-7n-ErO" firstAttribute="leading" secondItem="ZNG-2r-rGR" secondAttribute="leading" id="jYR-rc-1vY"/>
                             <constraint firstItem="vo6-mn-ImQ" firstAttribute="top" secondItem="Wr1-BO-18l" secondAttribute="bottom" constant="50" id="kWU-yg-aUX"/>
                             <constraint firstItem="Wr1-BO-18l" firstAttribute="leading" secondItem="ZNG-2r-rGR" secondAttribute="leadingMargin" constant="80" id="lMW-FN-wBs"/>
+                            <constraint firstItem="vo6-mn-ImQ" firstAttribute="top" secondItem="B2J-7n-ErO" secondAttribute="bottom" id="qE1-Rn-eVh"/>
                             <constraint firstItem="Wr1-BO-18l" firstAttribute="top" secondItem="M3t-pi-YSp" secondAttribute="bottom" constant="50" id="sek-qX-igP"/>
                             <constraint firstItem="nTE-vn-TIK" firstAttribute="top" secondItem="M3t-pi-YSp" secondAttribute="bottom" constant="10" id="xaK-4H-wgi"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="nTE-vn-TIK"/>
+                                <exclude reference="Wr1-BO-18l"/>
+                            </mask>
+                        </variation>
                     </view>
-                    <navigationItem key="navigationItem" title="Title" id="hDR-qU-sg2">
-                        <leftBarButtonItems>
-                            <barButtonItem title="Item" id="VLr-eZ-4Cc"/>
-                            <barButtonItem title="+" id="tPd-dc-oRJ"/>
-                        </leftBarButtonItems>
-                    </navigationItem>
                     <connections>
+                        <outlet property="activityIndicator" destination="OKv-K2-KXt" id="L3n-Nz-oDt"/>
                         <outlet property="backgroundModifierContainer" destination="nTE-vn-TIK" id="s5p-9O-pSZ"/>
                         <outlet property="collectionView" destination="U7g-ao-Gnm" id="ujZ-uv-t7a"/>
                         <outlet property="eventDetailedContainer" destination="Wr1-BO-18l" id="DbF-Hu-94U"/>
+                        <outlet property="loadingBlurContainer" destination="B2J-7n-ErO" id="9jb-LR-ViF"/>
                         <outlet property="navBar" destination="M3t-pi-YSp" id="QAb-cU-ajZ"/>
                         <segue destination="i1v-RN-h4p" kind="unwind" identifier="timelineToTitleScrn" animates="NO" unwindAction="unwindDestinationWithSegue:" id="VZv-gl-DGq"/>
                     </connections>
@@ -556,7 +607,7 @@
                                         </view>
                                         <blurEffect style="light"/>
                                     </visualEffectView>
-                                    <activityIndicatorView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="GBL-Gq-wvS">
+                                    <activityIndicatorView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="GBL-Gq-wvS">
                                         <rect key="frame" x="12.5" y="12.5" width="50" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
@@ -1007,7 +1058,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Mbl-Xv-SLj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1095" y="704"/>
+            <point key="canvasLocation" x="1392" y="730"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="lRi-lc-ZMT">
@@ -1036,6 +1087,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="8c0-q8-2Ok"/>
-        <segue reference="hWo-dG-UA2"/>
+        <segue reference="naH-f1-PhE"/>
     </inferredMetricsTieBreakers>
 </document>

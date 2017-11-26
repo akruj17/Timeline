@@ -31,6 +31,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     weak var delegate: BackgroundModifierDelegate?
     var layout: BackgroundModifierLayout!
     var imageStatusesArray: [imageStatusTuple]!
+    var deletedPaths: [String]!
     
     @IBAction func item(_ sender: Any) {
         collectionView.reloadData()
@@ -62,27 +63,11 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         super.viewDidLoad()
         //initialize variables
         imageStatusesArray = [imageStatusTuple]()
+        deletedPaths = [String]()
         //activityIndicator.startAnimating()
         if let layout = collectionView?.collectionViewLayout as? BackgroundModifierLayout {
             self.layout = layout
             self.layout.delegate = self
-        }
-        
-        //create references for the filesystem and current timeline directory
-        let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-        imgDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(delegate!.timelineName())") as NSString
-        
-        //retrieve imageInfo plist from directory
-        pListPath = imgDirectory.appendingPathComponent("\(IMAGE_INFO_PLIST)") as NSString
-        imageInfo = NSMutableDictionary(contentsOfFile: pListPath as String)
-        
-        //retrieve all image paths for the specific timeline from the filesystem
-        for imagePath in (imageInfo?.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
-            autoreleasepool {
-                let img = UIImage(contentsOfFile: imgDirectory.appendingPathComponent("\(imagePath)"))
-                let imgData = UIImageJPEGRepresentation(img!, 0.3)!
-                imageStatusesArray.append((imagePath, imgData, false, img!.size))
-            }
         }
         
         //set up collectionview
@@ -204,7 +189,17 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             imageStatusesArray.insert(contentsOf: tempImageData, at: 0)
         } else if updateType == .moveToEnd {
             imageStatusesArray.append(contentsOf: tempImageData)
+        } else if updateType == .delete {
+            for image in tempImageData {
+                if let path = image.filePath {
+                    deletedPaths.append(path)
+                }
+            }
         }
+    }
+    
+    func getDeletedPaths() -> [String] {
+        return deletedPaths
     }
     
     private func reloadLayout(updateType: UpdateAction) {
@@ -227,21 +222,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         collectionView.reloadData()
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
-    
-    func deleteImageFiles(imagePaths: [String]) {
-        let fileManager = FileManager.default
-        for path in imagePaths {
-            do {
-                let imgPath = imgDirectory.appendingPathComponent("\(path)")
-                try fileManager.removeItem(atPath: imgPath)
-            }
-            catch let error as NSError {
-                fatalError()
-            }
 
-        }
-    }
-  
 
 //////COLLECTION VIEW METHODS
     

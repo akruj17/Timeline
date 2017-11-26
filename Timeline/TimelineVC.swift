@@ -19,19 +19,27 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     @IBOutlet weak var backgroundModifierContainer: UIView!
     @IBOutlet weak var eventDetailedContainer: UIView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var loadingBlurContainer: UIView!
     
     var timeline: Timeline!
     var events: [Event]!
     var eventDetailedVC: EventDetailedVC!
+    var backgroundModifierVC: BackgroundModifierVC!
     var imageStatusesArray: [imageStatusTuple]!
     var colorCache = [UIColor]()
     var isInitialized = false
     var imgDirectory: NSString!
     var layout: TimelineLayout!
+    var pListPath: NSString!
+    var imageInfo: NSMutableDictionary!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        activityIndicator.startAnimating()
         //initialize variables
+        //let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timeline.name)
+        //events = tuple.0
+        events = [Event]()
         imageStatusesArray = [imageStatusTuple]()
         if let layout = collectionView?.collectionViewLayout as? TimelineLayout {
             self.layout = layout
@@ -47,14 +55,32 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         //set the title to store the title of the timeline
         navBar.titleTextAttributes = [ NSAttributedStringKey.font: UIFont(name: "AvenirNext-Regular", size: 30)!, NSAttributedStringKey.foregroundColor: UIColor.darkGray]
     
-        //store a reference to the image directory
+        //create references for the filesystem and current timeline directory
         let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
         imgDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(timeline.name)") as NSString
+        
+        //retrieve imageInfo plist from directory
+        pListPath = imgDirectory.appendingPathComponent("\(IMAGE_INFO_PLIST)") as NSString
+        imageInfo = NSMutableDictionary(contentsOfFile: pListPath as String)
+        
+        //retrieve all image paths for the specific timeline from the filesystem
+//        for imagePath in (imageInfo?.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
+//            autoreleasepool {
+//                let img = UIImage(contentsOfFile: imgDirectory.appendingPathComponent("\(imagePath)"))
+//                let imgData = UIImageJPEGRepresentation(img!, 0.3)!
+//                imageStatusesArray.append((imagePath, imgData, false, img!.size))
+//            }
+//        }
+//        updateColorCache()
+//        collectionView.reloadData()
         
         //set up properties of the container views
         backgroundModifierContainer.layer.borderColor = UIColor.lightGray.cgColor
         backgroundModifierContainer.layer.borderWidth = 2
         backgroundModifierContainer.layer.cornerRadius = 4
+        
+        //this initializes the background in the background modifier
+        backgroundModifierVC.imageStatusesArray = self.imageStatusesArray
         
         //initialize this global variable
         collectionHeight = collectionView.frame.height
@@ -81,11 +107,34 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timeline.name)
+        events = tuple.0
+       // retrieve all image paths for the specific timeline from the filesystem
+                for imagePath in (imageInfo?.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
+                    autoreleasepool {
+                        let img = UIImage(contentsOfFile: imgDirectory.appendingPathComponent("\(imagePath)"))
+                        let imgData = UIImageJPEGRepresentation(img!, 0.3)!
+                        imageStatusesArray.append((imagePath, imgData, false, img!.size))
+                    }
+                }
+                updateColorCache()
+                collectionView.reloadData()
+        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) { [unowned self] in
+            self.activityIndicator.stopAnimating()
+            self.loadingBlurContainer.isHidden = true
+        }
+    }
+    
 /////IB ACTION METHODS
     
     @IBAction func backBtnPressed(_ sender: Any) {
+        let currentCounter = imageInfo.value(forKey: IMAGE_COUNTER) as! Int
+        FileSystemOperator.updateImagesInFileSystem(imageStatusData: imageStatusesArray, imagePathsToDelete: backgroundModifierVC.deletedPaths, imageDirectory: imgDirectory, startCounter: currentCounter, imageInfo: imageInfo, pListPath: pListPath)
+       
         self.navigationController?.popToRootViewController(animated: true)
-//        performSegue(withIdentifier: "timelineToTitleScrn", sender: self)
     }
     
     @IBAction func modifyBackgroundPressed(_ sender: Any) {
@@ -125,7 +174,6 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 var color: UIColor
                 if indexPath.item < colorCache.count {
                     color = colorCache[indexPath.item]
-                    print("\(color.components.red) \(color.components.green) \(color.components.blue)")
                 } else {
                     color = UIColor.gray
                 }
@@ -168,9 +216,6 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             invalidationContext.invalidateImages = true
             layout.invalidateLayout(with: invalidationContext)
             updateColorCache()
-           // self.collectionView.reloadData()
-          //  self.collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
-
         }
         
         //removeContainerView()
@@ -210,9 +255,10 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                     DispatchQueue.main.async {
                         //self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
                         self.collectionView.reloadData()
-                        self.removeContainerView()
+                        if !self.backgroundModifierContainer.isHidden {
+                            self.removeContainerView()
+                        }
                     }
-              //  }
             })
         }
     }
@@ -223,6 +269,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "initializeBackgroundModifier" {
             if let backgroundModifierVC = segue.destination as? BackgroundModifierVC {
+                self.backgroundModifierVC = backgroundModifierVC
                 backgroundModifierVC.delegate = self
             }
         } else if segue.identifier == "timelineToEditor" {
@@ -243,14 +290,4 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
 
 protocol TimelineDataDelegate {
     func updateTitle(newTitle: Timeline);
-}
-
-extension UIColor {
-    var coreImageColor: CIColor {
-        return CIColor(color: self)
-    }
-    var components: (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
-        let coreImageColor = self.coreImageColor
-        return (coreImageColor.red, coreImageColor.green, coreImageColor.blue, coreImageColor.alpha)
-    }
 }
