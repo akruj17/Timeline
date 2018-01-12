@@ -9,6 +9,7 @@
 import UIKit
 
 let TIMELINE_IMAGE_DIRECTORY = "TimelineImages"
+let FIRST_IMAGES_DIRECTORY = "FirstImages"
 let IMAGE_INFO_PLIST = "imageInfo.plist"
 let IMAGE_COUNTER = "imageCounter"
 let IMAGE_ORDERING_ARRAY = "imageOrderingArray"

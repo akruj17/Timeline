@@ -29,8 +29,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Do any additional setup after loading the view, typically from a nib.
             if !fileManager.fileExists(atPath: direc as String) {
                 try! fileManager.createDirectory(atPath: direc as String, withIntermediateDirectories: true, attributes: nil)
+                let firstImagesPath = direc.appendingPathComponent("/\(FIRST_IMAGES_DIRECTORY)")
+                try! fileManager.createDirectory(atPath: firstImagesPath, withIntermediateDirectories: false, attributes: nil)
             }
         }
+        let direc = documents.appendingPathComponent(TIMELINE_IMAGE_DIRECTORY) as NSString
+        print("\(direc)")
+
         return true
     }
 
@@ -61,6 +66,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Saves changes in the application's managed object context before the application terminates.
     }
 
+    var orientationLock = UIInterfaceOrientationMask.landscape
+    
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return self.orientationLock
+    }
+}
+
+struct AppUtility {
+    
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask) {
+        
+        if let delegate = UIApplication.shared.delegate as? AppDelegate {
+            delegate.orientationLock = orientation
+        }
+    }
+    
+    /// OPTIONAL Added method to adjust lock and rotate to the desired orientation
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask, andRotateTo rotateOrientation:UIInterfaceOrientation) {
+        
+        self.lockOrientation(orientation)
+        
+        UIDevice.current.setValue(rotateOrientation.rawValue, forKey: "orientation")
+    }
+    
 }
 
 

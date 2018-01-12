@@ -15,7 +15,6 @@ class RealmOperator {
     //Save copies of the passed in events to the Realm database. Copies are made
     //and saved so that the originals can still be used and modified.
     static func saveToDatabase(events: [Event], timeline: Timeline) {
-        DispatchQueue.global(qos: .background).async {
             autoreleasepool {
                 do {
                     let realm = try Realm()
@@ -44,32 +43,31 @@ class RealmOperator {
                 }
                 print("\(Realm.Configuration.defaultConfiguration.fileURL)")
             }
-        }
     }
     
     //delete the events and/or timeline from the databsase.
     static func deleteFromDatabase(events: [Event], timeline: Timeline? = nil) {
-        autoreleasepool {
-            do {
-                let realm = try! Realm()
-                //only delete events that were saved at some point
-                for event in events {
-                    print("Overview:  \(event.overview)")
-                    print("Detailed: \(event.detailed)")
-                    print("timeline: \(event.timeline.name)")
-                    if event.id != "" {
-                        let temp = realm.object(ofType: Event.self, forPrimaryKey: event.id)
+            autoreleasepool {
+                do {
+                    let realm = try! Realm()
+                    //only delete events that were saved at some point
+                    for event in events {
+                        if event.id != "" {
+                            let temp = realm.object(ofType: Event.self, forPrimaryKey: event.id)
+                            try realm.write {
+                                realm.delete(temp!)
+                            }
+                        }
+                    }
+                    if let timelineTitle = timeline {
+                        let temp = realm.object(ofType: Timeline.self, forPrimaryKey: timelineTitle.id)
                         try realm.write {
                             realm.delete(temp!)
                         }
                     }
+                } catch let error as NSError {
+                    fatalError()
                 }
-                if let timelineTitle = timeline {
-                    realm.delete(timelineTitle)
-                }
-            } catch let error as NSError {
-                fatalError()
-            }
         }
     }
     
@@ -106,6 +104,34 @@ class RealmOperator {
             print("\(error)")
         }
         return (clone, chosen)
+    }
+    
+    static func timelineTitleIsNew(title: String) -> Bool {
+        do {
+            let realm = try Realm(configuration: Realm.Configuration.defaultConfiguration)
+            var predicate = NSPredicate(format: "name = %@", title)
+            let title = Array(realm.objects(Timeline.self).filter(predicate))
+            return title.count == 0
+        } catch let error as NSError {
+            print("\(error)")
+        }
+        return false
+    }
+    
+    static func timelineTitleIsNew(timeline: Timeline) -> Bool {
+        do {
+            let realm = try Realm(configuration: Realm.Configuration.defaultConfiguration)
+            var predicate = NSPredicate(format: "name = %@", timeline.name)
+            let title = Array(realm.objects(Timeline.self).filter(predicate))
+            if title.count == 0 {
+                return true;
+            } else {   // the user may not have modified the title
+                return title[0].id == timeline.id
+            }
+        } catch let error as NSError {
+            print("\(error)")
+        }
+        return false
     }
 }
 

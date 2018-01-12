@@ -27,6 +27,8 @@
 		A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F511FCA711B00058F6F /* customNavBar.swift */; };
 		A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86790F01F7C65F700F025F4 /* RealmOperator.swift */; };
 		A875E9681F89439700AD70EA /* EventDetailedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A875E9671F89439700AD70EA /* EventDetailedVC.swift */; };
+		A88102581FD32311004045EB /* TitleScreenBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102571FD32311004045EB /* TitleScreenBox.swift */; };
+		A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102591FD32D39004045EB /* TitleScreenCell.swift */; };
 		A8896D3B1F197D4500D62C0F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8896D3A1F197D4500D62C0F /* Event.swift */; };
 		A8D451F21F7E16320062FE9D /* FileSystemOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */; };
 		A8F615B01F26AFAD0093254A /* BackgroundModifierVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */; };
@@ -59,6 +61,8 @@
 		A8641F511FCA711B00058F6F /* customNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customNavBar.swift; sourceTree = "<group>"; };
 		A86790F01F7C65F700F025F4 /* RealmOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmOperator.swift; sourceTree = "<group>"; };
 		A875E9671F89439700AD70EA /* EventDetailedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailedVC.swift; sourceTree = "<group>"; };
+		A88102571FD32311004045EB /* TitleScreenBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenBox.swift; sourceTree = "<group>"; };
+		A88102591FD32D39004045EB /* TitleScreenCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenCell.swift; sourceTree = "<group>"; };
 		A8896D3A1F197D4500D62C0F /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemOperator.swift; sourceTree = "<group>"; };
 		A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundModifierVC.swift; sourceTree = "<group>"; };
@@ -109,6 +113,7 @@
 			children = (
 				A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */,
 				A8009C051F2BF94300DD32C3 /* ImageCells.swift */,
+				A88102591FD32D39004045EB /* TitleScreenCell.swift */,
 			);
 			name = "CollectionView Cells";
 			sourceTree = "<group>";
@@ -127,6 +132,7 @@
 			children = (
 				A81320001F3E5FC400F805ED /* UICells */,
 				A8153E5A1EF6138B00A7B02D /* TimelineEventBox.swift */,
+				A88102571FD32311004045EB /* TitleScreenBox.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -192,8 +198,8 @@
 				A8153E591EF6132300A7B02D /* Controller */,
 				A8153E851F02A95600A7B02D /* Layout */,
 				A818455F1EF387C500F7BEFB /* Main.storyboard */,
-				A8641F511FCA711B00058F6F /* customNavBar.swift */,
 				A81845651EF387C500F7BEFB /* Assets.xcassets */,
+				A8641F511FCA711B00058F6F /* customNavBar.swift */,
 				A81845671EF387C500F7BEFB /* LaunchScreen.storyboard */,
 				A818456A1EF387C500F7BEFB /* Info.plist */,
 				A8009C071F2FF6BC00DD32C3 /* constants.swift */,
@@ -352,9 +358,11 @@
 				A8F615B01F26AFAD0093254A /* BackgroundModifierVC.swift in Sources */,
 				A8FD345F1F480155009254D6 /* InvalidationContexts.swift in Sources */,
 				A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */,
+				A88102581FD32311004045EB /* TitleScreenBox.swift in Sources */,
 				A8009C041F2BF77100DD32C3 /* BackgroundModifierLayout.swift in Sources */,
 				A818455E1EF387C500F7BEFB /* TitleScreenVC.swift in Sources */,
 				A826E8E41F13FEEA0050B625 /* TimelineVC.swift in Sources */,
+				A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */,
 				A8D451F21F7E16320062FE9D /* FileSystemOperator.swift in Sources */,
 				A8009C081F2FF6BC00DD32C3 /* constants.swift in Sources */,
 				A8153E8B1F02BB3D00A7B02D /* TimelineEventBoxCell.swift in Sources */,

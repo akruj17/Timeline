@@ -22,10 +22,13 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     var isNewTimeline = false
     var backgroundThread = DispatchQueue(label: "realmThread", qos: .userInitiated)
     var trashcanIcon: UIImage!
+    weak var titleDelegate: TitleScreenLayoutDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
+        AppUtility.lockOrientation(.all)
+
         tableView.dataSource = self
         tableView.delegate = self
         //If the timeline is being created for the first time, fields should appear empty. Otherwise, fields should be filled with prior data from database.
@@ -76,22 +79,31 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         blurView.isHidden = false
         indicatorView.startAnimating()
         //only "attempted events" will be saved
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async { [unowned self] in
             let eventInfoArray = self.eventInfoArray.filter({
                 !($0.isEmpty())
             })
             //make sure "attempted events" and the timeline title are properly completed
             let needsEdit = self.performEventValidation(eventArray: eventInfoArray)
             //if fields were left empty or the number of complete events is less than 3, set an incomplete alert
-            if needsEdit || eventInfoArray.count < 3 {
+            //check if the timeline name is valid
+            var nameIsValid: Bool
+            if self.isNewTimeline {
+                nameIsValid = RealmOperator.timelineTitleIsNew(title: self.timelineTitle.name)
+            } else {
+                nameIsValid = RealmOperator.timelineTitleIsNew(timeline: self.timelineTitle)
+            }
+            if needsEdit || eventInfoArray.count < 3 || !nameIsValid {
                 let incompleteAlert = UIAlertController(title: "Incomplete", message: nil, preferredStyle: .alert)
                 incompleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 if needsEdit {
-                    incompleteAlert.message = "Fields that still need to be completed are highlighted in red."
+                    incompleteAlert.title = "Fields that still need to be completed are highlighted in red."
                 }
                 else if eventInfoArray.count < 3 {
-                    incompleteAlert.message = "Your timeline must have at least three completed events."
+                    incompleteAlert.title = "Your timeline must have at least three completed events."
                     self.initializeNumRows(rows: 3 - eventInfoArray.count)
+                } else {  // the title is not valid
+                    incompleteAlert.title = "A timeline with this title already exists."
                 }
                 //present the alert on the main thread
                 DispatchQueue.main.async(execute: { [unowned self] in
@@ -112,10 +124,11 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                     if self.isNewTimeline {
                         //Create directory for time line's images
                         FileSystemOperator.createImageDirectory(name: self.timelineTitle.name)
+                        self.titleDelegate.updateNumTitles(numTitles: 1)
                         self.performSegue(withIdentifier: "editorToTimeline", sender: eventInfoArray)
                     } else {
                         RealmOperator.deleteFromDatabase(events: self.deletedEvents)
-                        self.dismiss(animated: true, completion: nil)
+                        self.navigationController?.popViewController(animated: true)
                     }
                 })
             }
@@ -244,6 +257,13 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         }
         
         tableView.reloadData()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Don't forget to reset when view is being removed
+        AppUtility.lockOrientation(.landscape)
     }
     
 }

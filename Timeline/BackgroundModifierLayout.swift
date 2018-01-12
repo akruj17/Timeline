@@ -39,7 +39,7 @@ class BackgroundModifierLayout: UICollectionViewLayout {
                 
                 var frame = CGRect()
                 let width: CGFloat
-                if layoutInitialized {
+                if item < imageSizeCache.count {
                     width = imageSizeCache[item]
                 } else {
                     width = resizeImage(originalSize: delegate.getSizeAtIndexPath(indexPath: indexPath))

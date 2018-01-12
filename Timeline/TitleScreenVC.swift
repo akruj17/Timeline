@@ -9,7 +9,11 @@
 import UIKit
 import RealmSwift
 
-class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
+protocol TitleScreenLayoutDelegate: class {
+    func updateNumTitles(numTitles: Int)
+}
+
+class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UINavigationControllerDelegate, TitleScreenLayoutDelegate {
 
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -20,43 +24,46 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     @IBOutlet weak var collectionLeadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var collectionTrailingConstraint: NSLayoutConstraint!
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first!
-        print("touched\(touch.location(in: self.view))")
-    }
-    
-    @IBAction func btnPress(_ sender: Any) {
-        let t = Timeline()
-        t.name = "BLUFFERs"
-        t.id = NSUUID().uuidString
-        let realm = try! Realm()
-        try! realm.write {
-            realm.add(t)
-        }
-        print("HI")
-        print("\(timelineNames!.count)")
-        
-    }
-    
-    
+    var firstImagesDirectory: NSString!
+    var imageDataArray: [Data]!
     
     weak var layout: TitleScrnLayout!
     var collectionViewLoadedDetector = 0
     var timelineNames: Results<Timeline>?
     var indicator = UIActivityIndicatorView()
+    var updateScratch = 0 // used to store the change in number of timeline titles
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
+        imageDataArray = [Data]()
         collectionView.dataSource = self
         collectionView.delegate = self
         if let layout = collectionView?.collectionViewLayout as? TitleScrnLayout {
             self.layout = layout
         }
+        navigationController?.delegate = self
         
         //Obtain all timeline names from the database, and sort them chronologically
         let realm = try! Realm()
         timelineNames = realm.objects(Timeline.self).sorted(byKeyPath: "createdAt", ascending: true)
+        
+//        firstImagesDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(FIRST_IMAGES_DIRECTORY)") as NSString
+        
+//        let fileManager = FileManager.default
+//        for timeline in timelineNames! {
+//            let path = firstImagesDirectory.appendingPathComponent("/\(timeline.name).jpg")
+//            let img = UIImage(contentsOfFile: path)
+//            if let backgroundImage = img {
+//                let imgData = UIImageJPEGRepresentation(backgroundImage, 0.3)!
+//                imageDataArray.append(imgData)
+//            } else {
+//                imageDataArray.append(nil)
+//            }
+//        }
+        
+        
+        setupBackground()
     }
     
     override func viewDidLayoutSubviews() {
@@ -80,16 +87,44 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     
     override func viewWillAppear(_ animated: Bool) {
         indicator.stopAnimating()
-        if (timelineNames!.count + 1) > collectionView.numberOfItems(inSection: 0)
-        {
-            let currentItemLength = collectionView.numberOfItems(inSection: 0)
-            let invalidationContext = UICollectionViewLayoutInvalidationContext()
-            invalidationContext.invalidateItems(at: [IndexPath(item: currentItemLength - 1, section: 0)])
-            layout.invalidateLayout(with: invalidationContext)
-            
-            collectionView.reloadData()
-            collectionView.scrollToItem(at: IndexPath(item: (timelineNames?.count)!, section: 0), at: .right, animated: false)
+//        if (timelineNames!.count + 1) > collectionView.numberOfItems(inSection: 0)
+//        {
+//            let currentItemLength = collectionView.numberOfItems(inSection: 0)
+//            let invalidationContext = UICollectionViewLayoutInvalidationContext()
+//            invalidationContext.invalidateItems(at: [IndexPath(item: currentItemLength - 1, section: 0)])
+//            layout.invalidateLayout(with: invalidationContext)
+//            collectionView.reloadData()
+//            collectionView.scrollToItem(at: IndexPath(item: (timelineNames?.count)!, section: 0), at: .right, animated: false)
+//        } else if (timelineNames!.count + 1) < collectionView.numberOfItems(inSection: 0) {
+//            let invalidationContext = UICollectionViewLayoutInvalidationContext()
+//            invalidationContext.invalidateItems(at: [IndexPath(item: timelineNames!.count, section: 0)])
+//            layout.invalidateLayout(with: invalidationContext)
+//            collectionView.reloadData()
+//            collectionView.scrollToItem(at: IndexPath(item: (timelineNames?.count)!, section: 0), at: .right, animated: false)
+//        }
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        if viewController is TitleScreenVC {
+            if updateScratch != 0 {
+                let invalidationContext = UICollectionViewLayoutInvalidationContext()
+                let currentItemLength = collectionView.numberOfItems(inSection: 0)
+                if updateScratch > 0 {
+                    invalidationContext.invalidateItems(at: [IndexPath(item: currentItemLength - 1, section: 0)])
+                } else if updateScratch < 0 {
+                    invalidationContext.invalidateItems(at: [IndexPath(item: currentItemLength - 1, section: 0), IndexPath(item: currentItemLength - 2, section: 0)])
+                }
+                layout.invalidateLayout(with: invalidationContext)
+                collectionView.reloadData()
+                collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+                let x = collectionView.numberOfItems(inSection: 0)
+                collectionView.scrollToItem(at: IndexPath(item: (collectionView.numberOfItems(inSection: 0) - 1), section: 0), at: .right, animated: false)
+                updateScratch = 0
+            }
         }
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
     }
 
 //////////////////COLLECTIONVIEW METHODS
@@ -103,12 +138,16 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "titleCell", for: indexPath) as? TimelineEventBoxCell {
+        if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "titleCell", for: indexPath) as? TitleScreenCell {
             let isTopRow = indexPath.item % 2 == 0 ? true: false
             
             //Configure collectionview cells to appear as timeline objects. Last index has a special configuration to say "New Timeline"
             var title = (indexPath.item < timelineNames!.count) ? timelineNames![indexPath.item].name : "New Timeline"
-            cell.configure(isTopRow: isTopRow, title: title, color: UIColor.red, isTitleScreenEventBox: true)
+            if indexPath.item < imageDataArray.count {
+                cell.configure(isTopRow: isTopRow, title: title, color: UIColor.darkGray, image: nil)
+            } else {
+                cell.configure(isTopRow: isTopRow, title: title, color: UIColor.darkGray, image: nil)
+            }
             cell.layoutIfNeeded()
          //   cell.backgroundColor = UIColor.red
             return cell
@@ -139,16 +178,59 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
         }
     }
     
+    func setupBackground() {
+        firstImagesDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(FIRST_IMAGES_DIRECTORY)") as NSString
+        let fileManager = FileManager.default
+        let directoryContents = try! fileManager.contentsOfDirectory(atPath: firstImagesDirectory as String)
+
+        var numbersToChoose = Set<Int>()
+        // add a maximum of 5 images
+        while (numbersToChoose.count < 5 && numbersToChoose.count < directoryContents.count) {
+            numbersToChoose.insert(Int(arc4random_uniform(UInt32(directoryContents.count))))
+            }
+
+        if (numbersToChoose.count != 0) {
+            let imageSize = (self.view.frame.width / CGFloat(numbersToChoose.count)) * (1 / 0.85)
+            var xPosition: CGFloat = 0
+            for path in directoryContents {
+                let image = UIImage(contentsOfFile: firstImagesDirectory.appendingPathComponent(path))
+                let imageView = UIImageView(frame: CGRect(x: xPosition, y: 0, width: imageSize, height: self.view.frame.height))
+                xPosition += imageSize * 0.85
+                imageView.image = image
+                imageView.layer.zPosition = -1
+                imageView.contentMode = .scaleAspectFill
+                imageView.clipsToBounds = true
+
+                var gradientLayer = CAGradientLayer()
+                gradientLayer.frame = CGRect(x: 0, y: 0, width: imageView.frame.width, height: imageView.frame.height)
+                gradientLayer.colors = [
+                    UIColor(red: 0, green: 0, blue: 0, alpha: 0.01).cgColor,
+                    UIColor(red: 0, green: 0, blue: 0, alpha: 0.7).cgColor,
+                    UIColor(red: 0, green: 0, blue: 0, alpha: 0.01).cgColor]
+                
+                gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.0);
+                gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.0);
+                imageView.layer.mask = gradientLayer
+                
+                self.view.addSubview(imageView)
+            }
+        }
+
+    
+    }
+    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "titleScrnToEditor" {
             if let editorVC = segue.destination as? TimelineEditorVC {
                 editorVC.isNewTimeline = true
+                editorVC.titleDelegate = self
             }
         } else if segue.identifier == "titleScrnToTimeline" {
             if let timelineVC = segue.destination as? TimelineVC {
                 let timelineName = timelineNames![sender as! Int]
                 timelineVC.timeline = timelineName.copy() as! Timeline
+                timelineVC.titleDelegate = self
 //                let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timelineName.name)
 //                timelineVC.events = tuple.0
 //                timelineVC.timeline = tuple.1
@@ -156,5 +238,8 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
         }
     }
     
+    func updateNumTitles(numTitles: Int) {
+        updateScratch = numTitles
+    }
 }
 

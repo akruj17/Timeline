@@ -22,6 +22,9 @@ class TimelineEventBoxCell: UICollectionViewCell {
         if let firstYear = year {
             timelineBox.isFirstOfYear = true
             timelineBox.year = firstYear
+        } else {
+            timelineBox.isFirstOfYear = false
+            timelineBox.year = nil
         }
         
         timelineBox.setNeedsDisplay()

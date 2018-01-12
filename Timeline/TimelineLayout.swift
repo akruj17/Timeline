@@ -23,8 +23,26 @@ class TimelineLayout: UICollectionViewLayout {
     var delegate: ImageLayoutDelegate!
     
     override func prepare() {
+        //Setup for images
+        if imageCache.count != collectionView!.numberOfItems(inSection: 0) {
+            imageContentWidth = 0
+            var width: CGFloat = 0
+            for item in imageCache.count ..< collectionView!.numberOfItems(inSection: 0) {
+                let indexPath = IndexPath(item: item, section: 0)
+                var frame = CGRect()
+                
+                width = resizeImage(originalSize: delegate.getSizeAtIndexPath(indexPath: indexPath))
+                frame = CGRect(x: imageContentWidth, y: 0, width: width, height: contentHeight)
+                imageContentWidth += (width * 0.75)
+                
+                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+                attributes.frame = frame
+                imageCache.append(attributes)
+            }
+            imageContentWidth += (0.25 * width)
+        }
         //Setup for events
-        if eventCache.count != collectionView!.numberOfItems(inSection: 0) {
+        if eventCache.count != collectionView!.numberOfItems(inSection: 1) {
             let eventHeight = contentHeight * 0.30
             
             //This is actually the event cell width plus end padding
@@ -44,12 +62,12 @@ class TimelineLayout: UICollectionViewLayout {
                 }
             }
             
-            for item in eventCache.count ..< collectionView!.numberOfItems(inSection: 0) {
-                let indexPath = IndexPath(item: item, section: 0)
+            for item in eventCache.count ..< collectionView!.numberOfItems(inSection: 1) {
+                let indexPath = IndexPath(item: item, section: 1)
                 var frame = CGRect()
                 
                 frame = CGRect(x: xOffset[row], y: yOffset[row], width: (0.7 * eventCellWidth), height: eventHeight)
-                    xOffset[row] = xOffset[row] + eventCellWidth
+                xOffset[row] = xOffset[row] + eventCellWidth
                 
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
@@ -57,27 +75,7 @@ class TimelineLayout: UICollectionViewLayout {
                 
                 row = (row + 1) > 1 ? 0: 1
             }
-            
             eventContentWidth = max(xOffset[0], xOffset[1])
-        }
-        
-        //Setup for images
-        if imageCache.count != collectionView!.numberOfItems(inSection: 1) {
-            imageContentWidth = 0
-            var width: CGFloat = 0
-            for item in imageCache.count ..< collectionView!.numberOfItems(inSection: 1) {
-                let indexPath = IndexPath(item: item, section: 1)
-                var frame = CGRect()
-                
-                width = resizeImage(originalSize: delegate.getSizeAtIndexPath(indexPath: indexPath))
-                frame = CGRect(x: imageContentWidth, y: 0, width: width, height: contentHeight)
-                imageContentWidth += (width * 0.75)
-                
-                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-                attributes.frame = frame
-                imageCache.append(attributes)
-            }
-            imageContentWidth += (0.25 * width)
         }
     }
     
@@ -93,7 +91,7 @@ class TimelineLayout: UICollectionViewLayout {
         
         for attributes in eventCache {
             if attributes.frame.intersects(rect) {
-                    layoutAttributes.append(attributes)
+                layoutAttributes.append(attributes)
             }
         }
         for attributes in imageCache {

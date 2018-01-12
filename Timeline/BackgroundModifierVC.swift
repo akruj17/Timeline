@@ -25,8 +25,6 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var delete: UIButton!
     @IBOutlet weak var lblMessage: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var blurView: UIVisualEffectView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     weak var delegate: BackgroundModifierDelegate?
     var layout: BackgroundModifierLayout!
@@ -75,12 +73,6 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = false
         
-        //set up for loading animation
-        blurView.layer.borderColor = UIColor.lightGray.cgColor
-        blurView.layer.cornerRadius = 16
-        blurView.layer.borderWidth = 1
-        activityIndicator.backgroundColor = UIColor.clear
-        
         //configure long press gestures
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(BackgroundModifierVC.handleLongGesture(_:)))
         self.collectionView.addGestureRecognizer(longPressGesture)
@@ -90,7 +82,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         
         //set up notifications so that if the user quits the app mid modification, changes will still be saved.
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: Notification.Name.UIApplicationWillResignActive, object: nil)
+//        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: Notification.Name.UIApplicationWillResignActive, object: nil)
         
         //this initializes the background in the actual timeline
         delegate!.updateBackgroundImages(imageStatuses: imageStatusesArray)
@@ -107,10 +99,10 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         
     }
     
-    @objc func appMovedToBackground() {
-        imageInfo.setValue(imageStatusesArray.map {$0.0}, forKeyPath: IMAGE_ORDERING_ARRAY)
-        imageInfo.write(toFile: pListPath as String, atomically: false)
-    }
+//    @objc func appMovedToBackground() {
+//        imageInfo.setValue(imageStatusesArray.map {$0.0}, forKeyPath: IMAGE_ORDERING_ARRAY)
+//        imageInfo.write(toFile: pListPath as String, atomically: false)
+//    }
     
 ////// IB ACTION METHODS
     
@@ -143,16 +135,12 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     @IBAction func donePressed(_ sender: Any) {
-        activityIndicator.startAnimating()
-        delegate!.updateBackgroundImages(imageStatuses: imageStatusesArray)
-       
-      //  delegate!.removeContainerView()
+        
+            self.delegate!.updateBackgroundImages(imageStatuses: self.imageStatusesArray)
+
 
     }
-    
-    func closeSelf() {
-        activityIndicator.stopAnimating()
-    }
+
     
     func setEnabledButtons() {
         if selectedCount == 0 {
@@ -334,11 +322,11 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                 options.isSynchronous = true
                 for (index, asset) in assets.enumerated() {
                     autoreleasepool {
-                        let newWidth = (collectionHeight / CGFloat(asset.pixelHeight)) * CGFloat(asset.pixelWidth)
-                        photoManager.requestImage(for: asset, targetSize: CGSize(width: newWidth, height: collectionHeight), contentMode: PHImageContentMode.aspectFit, options: options, resultHandler: {[unowned self] (result, info) in
-                            let imageData = UIImageJPEGRepresentation(result!, 0.3)!
-                            self.imageStatusesArray.insert((filePath: nil, data: imageData, selectedStat: false, largeSize: result!.size),
-                                at: self.insertionIndex + index)
+                    let newWidth = (collectionHeight / CGFloat(asset.pixelHeight)) * CGFloat(asset.pixelWidth)
+                    photoManager.requestImage(for: asset, targetSize: CGSize(width: newWidth, height: collectionHeight), contentMode: PHImageContentMode.aspectFit, options: options, resultHandler: {[unowned self] (result, info) in
+                        let imageData = UIImageJPEGRepresentation(result!, 0.3)!
+                        print("&&&&&&&&&\(self.insertionIndex + index)")
+                        self.imageStatusesArray.insert((filePath: nil, data: imageData, selectedStat: false, largeSize: result!.size), at: self.insertionIndex + index)
                             indexPaths.append(IndexPath(item: self.insertionIndex + index, section: 0))
                         })
                     }

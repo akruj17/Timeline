@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Timeline/TimelineLayout.swift"
-            timestampString = "532560534.968008"
+            timestampString = "533523103.320613"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "131"
@@ -26,13 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Timeline/TimelineLayout.swift"
-            timestampString = "532560534.968497"
+            timestampString = "533523103.320715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "135"
-            endingLineNumber = "135"
-            landmarkName = "TimelineLayout"
-            landmarkType = "3">
+            endingLineNumber = "135">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

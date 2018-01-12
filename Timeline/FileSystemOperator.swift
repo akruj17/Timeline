@@ -27,7 +27,7 @@ class FileSystemOperator {
     }
     
     
-    static func updateImagesInFileSystem(imageStatusData: [imageStatusTuple], imagePathsToDelete: [String], imageDirectory: NSString, startCounter: Int, imageInfo: NSMutableDictionary, pListPath: NSString) {
+    static func updateImagesInFileSystem(imageStatusData: [imageStatusTuple], imagePathsToDelete: [String], imageDirectory: NSString, startCounter: Int, imageInfo: NSMutableDictionary, pListPath: NSString, timelineTitle: String) {
         DispatchQueue.global(qos: .background).async {
             //first delete the images no longer needed...doing this first is a bit more efficient because the imagedirectory has fewer files
             for path in imagePathsToDelete {
@@ -41,6 +41,7 @@ class FileSystemOperator {
             }
             //Now add the images that need to be saved
             var filePathOrdering = [String]()
+            let randomIndex = Int(arc4random_uniform(UInt32(imageStatusData.count)))
             for (index, image) in imageStatusData.enumerated() {
                 autoreleasepool {
                     // if the image has not already been saved before, it will not already have a file path
@@ -49,9 +50,13 @@ class FileSystemOperator {
                         let imageFile = imageDirectory.appendingPathComponent(imagePath)
                         fileManager.createFile(atPath: imageFile, contents: image.data, attributes: nil)
                         filePathOrdering.append(imagePath)
-                        print("cOngrats you saved an image")
                     } else {
                         filePathOrdering.append(image.filePath!)
+                    }
+                    if index == randomIndex {
+                        let firstImageDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(FIRST_IMAGES_DIRECTORY)") as NSString
+                        let imageFile = firstImageDirectory.appendingPathComponent("\(timelineTitle).jpg")
+                        fileManager.createFile(atPath: imageFile, contents: UIImageJPEGRepresentation(UIImage(data: image.data)!, 0.3)!, attributes: nil)
                     }
                 }
             }
@@ -71,6 +76,8 @@ class FileSystemOperator {
         UIGraphicsEndImageContext()
         return newImage!
     }
+    
+    
 }
 
 
