@@ -20,7 +20,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     var timelineTitle = Timeline()
     var titleNeedsEditing = false
     var isNewTimeline = false
-    var backgroundThread = DispatchQueue(label: "realmThread", qos: .userInitiated)
+    var backgroundThread = DispatchQueue(label: "realmThread", qos: .background)
     var trashcanIcon: UIImage!
     weak var titleDelegate: TitleScreenLayoutDelegate!
     
@@ -49,6 +49,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     override func viewWillAppear(_ animated: Bool) {
         blurView.isHidden = true
         indicatorView.stopAnimating();
+        tableView.reloadData()
     }
     
     
@@ -59,7 +60,11 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         let warningAlert = UIAlertController(title: "Are you sure?", message: "Any edits will not be saved", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         let positiveAction = UIAlertAction(title: "Discard", style: .destructive) { [unowned self] action in
-            self.dismiss(animated: true, completion: nil)
+            if self.isNewTimeline {
+                self.navigationController?.popToRootViewController(animated: false)
+            } else {
+                self.dismiss(animated: true, completion: nil)
+            }
         }
         warningAlert.addAction(cancelAction)
         warningAlert.addAction(positiveAction)
@@ -111,11 +116,6 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                     self.indicatorView.stopAnimating()
                     self.present(incompleteAlert, animated: true, completion: self.tableView.reloadData)
                 })
-//                DispatchQueue.main.async {
-//                    self.blurView.isHidden = true
-//                    self.indicatorView.stopAnimating()
-//                    self.present(incompleteAlert, animated: true, completion: self.tableView.reloadData)
-//                }
             } else {
                 //At this point, the timeline is valid and will be saved in the Realm. Deleted
                 //events will be removed.
@@ -139,17 +139,21 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
 ///////////////TABLEVIEW METHODS
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return eventInfoArray.count + 1
+        if section == 0 {
+            return 1
+        } else {
+            return eventInfoArray.count
+        }
     }
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 {
+        if indexPath.section == 0 {
             if let cell = tableView.dequeueReusableCell(withIdentifier: "titleFormCell", for: indexPath) as? TimelineTitleEditorCell {
                 cell.configure(timeline: timelineTitle)
                 return cell
@@ -157,7 +161,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         }
         else {
             if let cell = tableView.dequeueReusableCell(withIdentifier: "eventFormCell", for: indexPath) as? EventEditorCell {
-                cell.configure(index: indexPath.row, eventInfo: eventInfoArray[indexPath.row - 1])
+                cell.configure(index: indexPath.row + 1, eventInfo: eventInfoArray[indexPath.row])
                 return cell
             }
         }
@@ -165,7 +169,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 0 {
+        if indexPath.section == 0 {
             return 100
         }
         return 300
@@ -179,12 +183,16 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let deleteButton = UITableViewRowAction(style: .normal, title: "                      ") { [unowned self] action, index in
-            self.deletedEvents.append(self.eventInfoArray.remove(at: indexPath.item - 1))
+            self.deletedEvents.append(self.eventInfoArray.remove(at: indexPath.item))
             tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.reloadData()
+            tableView.reloadRows(at: tableView.indexPathsForVisibleRows!, with: UITableViewRowAnimation.automatic)
         }
         deleteButton.backgroundColor = UIColor(patternImage: trashcanIcon)
         return [deleteButton]
     }
+    
+
     
 //////HELPER METHODS
     
@@ -194,7 +202,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         for _ in 0 ..< rows {
             let event = Event()
             eventInfoArray.append(event)
-            indexPaths.append(IndexPath(row: eventInfoArray.count, section: 0))
+            indexPaths.append(IndexPath(row: eventInfoArray.count - 1, section: 1))
         }
         tableView.insertRows(at: indexPaths, with: .bottom)
     }
@@ -202,7 +210,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     //creates the trashcan of fixed size
     func createIcons(image: UIImage) -> UIImage {
-        let width: CGFloat = 120
+        let width: CGFloat = 80
         let height: CGFloat = 300
         UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0.0)
         let origin = CGPoint(x: (width - image.size.width) / 2.0, y: (height - image.size.height) / 2.0)
@@ -220,9 +228,19 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         var requiresEdits = false
         if eventArray.count > 0 {
             for event in eventArray {
-                if event.year.value == nil {
-                    event.editsRequired.updateValue(true, forKey: "year")
+                if event.startYear.value == nil {
+                    event.editsRequired.updateValue(true, forKey: "startYear")
                     requiresEdits = true
+                }
+                if event.isTimePeriod {
+                    if event.endYear.value == nil {
+                        event.editsRequired.updateValue(true, forKey: "endYear")
+                        requiresEdits = true
+                    } else if event.endYear.value! < event.startYear.value! {
+                        event.editsRequired.updateValue(true, forKey: "endYear")
+                        event.editsRequired.updateValue(true, forKey: "startYear")
+                        requiresEdits = true
+                    }
                 }
                 if event.overview.isEmpty {
                     event.editsRequired.updateValue(true, forKey: "overview")
@@ -242,21 +260,11 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         if segue.identifier == "editorToTimeline" {
             if let timelineVC = segue.destination as? TimelineVC {
                 timelineVC.timeline = timelineTitle
-                timelineVC.events = sender as! [Event]
+                let events = sender as! [Event]
+                // sort the events because this is the VERY FIRST TIME the timeline will be opened
+                timelineVC.events = events
             }
         }
-    }
-    
-    
-    @IBAction func automateEntry(_ sender: Any) {
-        timelineTitle.name = NSUUID().uuidString
-        for x in 0...4 {
-            var event = eventInfoArray[x]
-            event.year.value = 1990
-            event.overview = "HI"
-        }
-        
-        tableView.reloadData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {

@@ -21,7 +21,6 @@ class TimelineEventBox: UIView {
     let colorConstant: CGFloat = 100
     var alreadyConstructed: Bool = false
 
-    var isTitleScreenEventBox: Bool = false
     var isTopRow: Bool = false
     var isFirstOfYear: Bool = false
     var stringVal: String = ""
@@ -48,19 +47,11 @@ class TimelineEventBox: UIView {
         var boxFrame = CGRect()
         var subFrame = CGRect()
         var supplementalFrame  = CGRect()
-        let boxHeight: CGFloat = 0.7 * rect.size.height
+        let boxHeight: CGFloat = 0.2 * collectionHeight
 
-        if isTitleScreenEventBox {
-            textView.font = UIFont(name: "AvenirNext-Regular", size: 20)
-            textView.textAlignment = NSTextAlignment.center
-            eventBox.layer.borderWidth = 5
-            supplementalFrame.size = CGSize(width: rect.width, height: rect.height - boxHeight)
-        }
-        else {
-            textView.font = UIFont(name: "AvenirNext-Regular", size: 25)
-            supplementalFrame.size = CGSize(width: rect.width / 2, height: rect.height - boxHeight)
-            eventBox.layer.borderWidth = 8
-        }
+        textView.font = UIFont(name: "AvenirNext-Regular", size: 30)
+        supplementalFrame.size = CGSize(width: rect.width / 2, height: rect.height - boxHeight)
+        eventBox.layer.borderWidth = 8
 
         boxFrame.size = CGSize(width: rect.width, height: boxHeight)
         if isTopRow {
@@ -84,7 +75,7 @@ class TimelineEventBox: UIView {
         if isFirstOfYear {  // the supplemental view will be the year displayed
             yearBlur.frame = CGRect(x: 10, y: 10, width: supplementalFrame.width - 20, height: supplementalFrame.height - 20)
             supplementalView.addSubview(yearBlur)
-            yearLabel.text = String(describing: year!)
+            yearLabel.text = "\(abs(year!))" + ((year! < 0) ? " BCE" : "")
             yearLabel.font = UIFont(name: "AvenirNext-Regular", size: 50)
             yearLabel.sizeToFit()
             yearLabel.textAlignment = .center
@@ -99,11 +90,9 @@ class TimelineEventBox: UIView {
             stickView.backgroundColor = color
         }
 
-        if !isTitleScreenEventBox {
-            textViewBlur.frame = subFrame
-            eventBox.insertSubview(textViewBlur, at: 1)
-            alreadyConstructed = true
-        }
+        textViewBlur.frame = subFrame
+        eventBox.insertSubview(textViewBlur, at: 1)
+        alreadyConstructed = true
 
         eventBox.backgroundColor = UIColor.clear
         textView.backgroundColor = UIColor.clear

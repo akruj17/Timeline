@@ -14,13 +14,15 @@ protocol CellDelegate {
 
 class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate {
 
-    @IBOutlet weak var yearField: UITextField!
+    @IBOutlet weak var startYearField: UITextField!
+    @IBOutlet weak var endYearField: UITextField!
     @IBOutlet weak var eventIndexLbl: UILabel!
     @IBOutlet weak var eventOverviewField: UITextView!
     @IBOutlet weak var eventDetailedField: UITextView!
-    @IBOutlet weak var isBCE: UISwitch!
+    @IBOutlet weak var isTimePeriod: UISwitch!
     @IBAction func switchChanged(_ sender: UISwitch) {
-        event.isBCE = sender.isOn
+        event.isTimePeriod = sender.isOn
+        showEndYearLabel(isTimePeriod: sender.isOn)
     }
     
     var eventIndex: Int!
@@ -33,13 +35,14 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
         super.awakeFromNib()
         eventOverviewField.delegate = self
         eventDetailedField.delegate = self
-        yearField.delegate = self
+        startYearField.delegate = self
+        endYearField.delegate = self
         eventOverviewField.layer.borderWidth = 2
         eventOverviewField.layer.cornerRadius = 5
         eventDetailedField.layer.borderWidth = 2
         eventDetailedField.layer.cornerRadius = 5
-        yearField.layer.borderWidth = 2
-        yearField.layer.cornerRadius = 5
+        startYearField.layer.borderWidth = 2
+        endYearField.layer.borderWidth = 2
         
     }
     
@@ -81,11 +84,20 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if  let text = textField.text {
-            if text.isEmpty {
-                event.year.value = nil
-            } else {
-                event.year.value = Int(text)
-                event.editsRequired.updateValue(false, forKey: "year")
+            if textField == startYearField {
+                if text.isEmpty {
+                    event.startYear.value = nil
+                } else {
+                    event.startYear.value = Int(text)
+                    event.editsRequired.updateValue(false, forKey: "startYear")
+                }
+            } else if isTimePeriod.isOn && textField == endYearField {
+                if text.isEmpty {
+                    event.endYear.value = nil
+                } else {
+                    event.endYear.value = Int(text)
+                    event.editsRequired.updateValue(false, forKey: "endYear")
+                }
             }
         }
     }
@@ -93,7 +105,7 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if textView == eventOverviewField {
             guard let box = textView.text else { return true }
-            let newLength = box.characters.count + text.characters.count - range.length
+            let newLength = box.count + text.count - range.length
             return newLength <= 70
         }
         return true
@@ -101,16 +113,24 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         var result = true
-        
-        if string.characters.count > 0 {
-            let disallowedCharacterSet = NSCharacterSet(charactersIn: "0123456789").inverted
+        var disallowedCharacterSet: CharacterSet
+        if let input = textField.text {
+            if input.count != 0 {
+                disallowedCharacterSet = NSCharacterSet(charactersIn: "0123456789").inverted
+            } else {
+                disallowedCharacterSet = NSCharacterSet(charactersIn: "-0123456789").inverted
+            }
+        } else {
+            disallowedCharacterSet = NSCharacterSet(charactersIn: "-0123456789").inverted
+        }
+        if string.count > 0 {
             let replacementStringIsLegal = string.rangeOfCharacter(from: disallowedCharacterSet) == nil
             result = replacementStringIsLegal
-            }
+        }
         if result {
             guard let box = textField.text else {return true}
-            let newLength = box.characters.count + string.characters.count - range.length
-            result = newLength <= 4
+            let newLength = box.count + string.count - range.length
+            result = newLength <= 5
         }
     
         return result
@@ -122,10 +142,15 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
         eventIndex = index - 1
         event = eventInfo
         
-        if !(event.year.value == nil) {
-            yearField.text = String(event.year.value!)
+        if !(event.startYear.value == nil) {
+            startYearField.text = String(event.startYear.value!)
         } else {
-            yearField.text = ""
+            startYearField.text = ""
+        }
+        if eventInfo.isTimePeriod && event.endYear.value != nil {
+            endYearField.text = String(event.endYear.value!)
+        } else {
+            endYearField.text = ""
         }
         if !event.overview.isEmpty {
             eventOverviewField.text = event.overview
@@ -141,18 +166,19 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
             eventDetailedField.text = eventDetailedPlaceholder
             eventDetailedField.textColor = UIColor.lightGray
         }
-        if !event.isBCE {
-            isBCE.setOn(false, animated: false)
+        isTimePeriod.setOn(event.isTimePeriod, animated: false)
+        showEndYearLabel(isTimePeriod: event.isTimePeriod)
+        if event.editsRequired["startYear"]! {
+            startYearField.layer.borderColor = UIColor.red.cgColor
+        } else {
+            startYearField.layer.borderColor = UIColor.darkGray.cgColor
         }
-        else {
-            isBCE.setOn(true, animated: false)
-        }
-        
-        if event.editsRequired["year"]! {
-            yearField.layer.borderColor = UIColor.red.cgColor
-        }
-        else {
-            yearField.layer.borderColor = UIColor.darkGray.cgColor
+        if event.isTimePeriod {
+            if event.editsRequired["endYear"]! {
+                endYearField.layer.borderColor = UIColor.red.cgColor
+            } else {
+                endYearField.layer.borderColor = UIColor.darkGray.cgColor
+            }
         }
         if event.editsRequired["overview"]! {
             eventOverviewField.layer.borderColor = UIColor.red.cgColor
@@ -163,6 +189,10 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
         
     }
     
+    func showEndYearLabel(isTimePeriod: Bool) {
+        endYearField.isHidden = !isTimePeriod
+        startYearField.placeholder = isTimePeriod ? "Start Year" : "Event Year"
+    }
 
     override func layoutSubviews() {
         super.layoutSubviews()

@@ -35,10 +35,8 @@ class customNavBar: UINavigationBar {
             }
         
             stringFromClass = NSStringFromClass(subview.classForCoder)
-            print("\(stringFromClass)")
             if stringFromClass.contains("BarContent") {
                 if stringFromClass.contains("Title") {
-                    print("HI")
                 } else {
                     subview.frame = CGRect(x: subview.frame.origin.x, y: 20, width: subview.frame.width, height: customHeight - 20)
                 }

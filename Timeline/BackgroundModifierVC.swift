@@ -86,9 +86,6 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         
         //this initializes the background in the actual timeline
         delegate!.updateBackgroundImages(imageStatuses: imageStatusesArray)
-        
-        print("\(imgDirectory)")
-        
 
         
 
@@ -325,7 +322,6 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                     let newWidth = (collectionHeight / CGFloat(asset.pixelHeight)) * CGFloat(asset.pixelWidth)
                     photoManager.requestImage(for: asset, targetSize: CGSize(width: newWidth, height: collectionHeight), contentMode: PHImageContentMode.aspectFit, options: options, resultHandler: {[unowned self] (result, info) in
                         let imageData = UIImageJPEGRepresentation(result!, 0.3)!
-                        print("&&&&&&&&&\(self.insertionIndex + index)")
                         self.imageStatusesArray.insert((filePath: nil, data: imageData, selectedStat: false, largeSize: result!.size), at: self.insertionIndex + index)
                             indexPaths.append(IndexPath(item: self.insertionIndex + index, section: 0))
                         })

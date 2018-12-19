@@ -8,6 +8,7 @@
 
 import UIKit
 
+var collectionHeight: CGFloat!
 class TimelineLayout: UICollectionViewLayout {
 
     var eventCellWidth: CGFloat!
@@ -21,6 +22,7 @@ class TimelineLayout: UICollectionViewLayout {
     var imageCache = [UICollectionViewLayoutAttributes]()
     
     var delegate: ImageLayoutDelegate!
+    var eventDelegate: EventLayoutDelegate!
     
     override func prepare() {
         //Setup for images
@@ -43,12 +45,10 @@ class TimelineLayout: UICollectionViewLayout {
         }
         //Setup for events
         if eventCache.count != collectionView!.numberOfItems(inSection: 1) {
-            let eventHeight = contentHeight * 0.30
-            
+            collectionHeight = contentHeight
             //This is actually the event cell width plus end padding
-            eventCellWidth = eventHeight * 3
+            eventCellWidth = contentHeight * 0.8
             
-            var yOffset: [CGFloat] = [((contentHeight / 2) - 5) - eventHeight, (contentHeight / 2) + 5]
             var xOffset: [CGFloat] = [20, 20 + (eventCellWidth / 2)]
             var row = 0
             
@@ -64,11 +64,20 @@ class TimelineLayout: UICollectionViewLayout {
             
             for item in eventCache.count ..< collectionView!.numberOfItems(inSection: 1) {
                 let indexPath = IndexPath(item: item, section: 1)
+
                 var frame = CGRect()
-                
-                frame = CGRect(x: xOffset[row], y: yOffset[row], width: (0.7 * eventCellWidth), height: eventHeight)
+                var cellHeight: CGFloat = contentHeight * 0.3 // default for events
+                var yPos: CGFloat = (row % 2 == 0) ? ((contentHeight / 2) - 5) - cellHeight : (contentHeight / 2) + 5
+                if eventDelegate.isTimeObjectPeriod(index: item) {
+                    cellHeight = 0.85 * contentHeight
+                    if row == 0 {
+                        yPos = contentHeight * 0.1
+                    } else {
+                        yPos = contentHeight * 0.05
+                    }
+                }
+                frame = CGRect(x: xOffset[row], y: yPos, width: (0.7 * eventCellWidth), height: cellHeight)
                 xOffset[row] = xOffset[row] + eventCellWidth
-                
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 eventCache.append(attributes)
@@ -129,5 +138,29 @@ class TimelineLayout: UICollectionViewLayout {
         let scale = contentHeight / originalSize.height
         return scale * originalSize.width
     }
+    
+    private func generateEventHeight(index: Int) -> CGFloat {
+        let minEventHeight = contentHeight * 0.30
+        let maxEventHeight = contentHeight * 0.45
+        if eventDelegate.isEventAtIndexFirstOfYear(index: index) { 
+            return 0.35 * contentHeight
+        } else if index >= 0 && index < 4 {
+            return CGFloat(arc4random_uniform(UInt32(maxEventHeight - minEventHeight)) + UInt32(minEventHeight))
+        } else {
+            let prevHeight = eventCache[index - 2].frame.height
+            let prevPrevHeight = eventCache[index - 4].frame.height
+            if prevHeight < prevPrevHeight {  // this cell should have a greater height to keep the pattern
+                return CGFloat(arc4random_uniform(UInt32(maxEventHeight - prevHeight)) + UInt32(prevHeight))
+            } else { // this cell should have a lower height to keep the pattern
+                return CGFloat(arc4random_uniform(UInt32(prevHeight - minEventHeight)) + UInt32(minEventHeight))
+            }
+        }
+        
+    }
 
+}
+
+protocol EventLayoutDelegate: class {
+    func isEventAtIndexFirstOfYear(index: Int) -> Bool
+    func isTimeObjectPeriod(index: Int) -> Bool
 }

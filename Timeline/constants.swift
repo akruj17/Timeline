@@ -16,6 +16,10 @@ let IMAGE_ORDERING_ARRAY = "imageOrderingArray"
 
 let TITLE_TIMELINE_PADDING = 120
 
+let PERIOD_CELL_BORDER: CGFloat = 10
+
+let editorViewRed = UIColor(red: 236/255, green: 105/255, blue: 83/255, alpha: 1)
+
 enum UpdateAction {
     case insert
     case delete

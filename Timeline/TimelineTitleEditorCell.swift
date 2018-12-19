@@ -19,6 +19,8 @@ class TimelineTitleEditorCell: UITableViewCell, UITextFieldDelegate {
         titleLbl.layer.borderColor = UIColor.darkGray.cgColor
         titleLbl.layer.borderWidth = 2
         titleLbl.layer.cornerRadius = 5
+        self.layer.borderColor = UIColor.black.cgColor
+        self.layer.borderWidth = 1
     }
 
     func textFieldDidBeginEditing(_ textField: UITextField) {

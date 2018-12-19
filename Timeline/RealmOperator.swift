@@ -23,6 +23,7 @@ class RealmOperator {
                         timeline.id = NSUUID().uuidString
                     }
                     let timelineCopy = timeline.copy() as! Timeline
+                    timelineCopy.createdAt = Date()
                     try realm.write {
                         realm.add(timelineCopy, update: true)
                     }
@@ -41,8 +42,22 @@ class RealmOperator {
                 } catch let error as NSError {
                     fatalError()
                 }
-                print("\(Realm.Configuration.defaultConfiguration.fileURL)")
             }
+    }
+    
+    static func saveToDatabase(event: Event) {
+        do {
+            let realm = try! Realm()
+            let eventCopy = event.copy() as! Event
+            let timelineCopy = eventCopy.timeline
+            timelineCopy!.createdAt = Date()
+            try realm.write {
+                realm.add(eventCopy, update: true)
+                realm.add(timelineCopy!, update: true)
+            }
+        }  catch let error as NSError {
+            fatalError()
+        }
     }
     
     //delete the events and/or timeline from the databsase.
@@ -71,6 +86,28 @@ class RealmOperator {
         }
     }
     
+    static func deleteTimelineFromDatabase(timeline: Timeline) {
+        do {
+            let realm = try Realm()
+            var predicate = NSPredicate(format: "timeline.name = %@", timeline.name)
+            let events = Array(realm.objects(Event.self).filter(predicate))
+            for event in events {
+                try realm.write {
+                    realm.delete(event)
+                }
+            }
+            predicate = NSPredicate(format: "name = %@", timeline.name)
+            let timeline = realm.objects(Timeline.self).filter(predicate)[0]
+            try realm.write {
+                realm.delete(timeline)
+            }
+        }
+        catch let error as NSError {
+            fatalError()
+        }
+
+    }
+    
     //retrieve a list of timeline objects
     static func retrieveTimelinesFromDatabase() -> Results<Timeline> {
         var timelineNames: Results<Timeline>!
@@ -79,7 +116,7 @@ class RealmOperator {
             timelineNames = realm.objects(Timeline.self).sorted(byKeyPath: "createdAt", ascending: true)
         }
         catch let error as NSError {
-            print("\(error)")
+            fatalError()
         }
         return timelineNames
     }
@@ -93,7 +130,6 @@ class RealmOperator {
             let realm = try Realm(configuration: Realm.Configuration.defaultConfiguration)
             var predicate = NSPredicate(format: "timeline.name = %@", timeline)
             let events = Array(realm.objects(Event.self).filter(predicate))
-            print("\(events.count)")
             for event in events {
                 clone.append(event.copy() as! Event)
             }
@@ -101,7 +137,7 @@ class RealmOperator {
             chosen = (realm.objects(Timeline.self).filter(predicate)[0]).copy() as! Timeline
         }
         catch let error as NSError {
-            print("\(error)")
+            fatalError()
         }
         return (clone, chosen)
     }
@@ -113,7 +149,7 @@ class RealmOperator {
             let title = Array(realm.objects(Timeline.self).filter(predicate))
             return title.count == 0
         } catch let error as NSError {
-            print("\(error)")
+            fatalError()
         }
         return false
     }
@@ -129,7 +165,7 @@ class RealmOperator {
                 return title[0].id == timeline.id
             }
         } catch let error as NSError {
-            print("\(error)")
+            fatalError()
         }
         return false
     }

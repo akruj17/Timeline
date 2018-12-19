@@ -35,7 +35,7 @@ class TitleScreenBox: UIView {
         textView.isUserInteractionEnabled = false
         textView.textAlignment = .center
         
-        textView.font = UIFont(name: "AvenirNext-Regular", size: 20)
+        textView.font = UIFont(name: "AvenirNext-Regular", size: 25)
         textView.textAlignment = NSTextAlignment.center
         titleBox.layer.borderWidth = 5
     }

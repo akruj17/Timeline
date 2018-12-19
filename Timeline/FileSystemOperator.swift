@@ -23,7 +23,6 @@ class FileSystemOperator {
         data.setValue(0, forKey: IMAGE_COUNTER)
         data.setValue([String](), forKey: IMAGE_ORDERING_ARRAY)
         data.write(toFile: imageInfoFile as String, atomically: false)
-        print("\(direc)")
     }
     
     
@@ -77,7 +76,17 @@ class FileSystemOperator {
         return newImage!
     }
     
-    
+    static func deleteTimelineImages(imgDirectory: NSString, imageInfo: NSMutableDictionary) {
+        autoreleasepool {
+            do {
+                for imagePath in (imageInfo.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
+                    try fileManager.removeItem(atPath: imgDirectory.appendingPathComponent("\(imagePath)"))
+                }
+                try fileManager.removeItem(atPath: imgDirectory as String)
+            } catch let error as NSError {
+                fatalError()
+            }
+        }
+    }
+
 }
-
-

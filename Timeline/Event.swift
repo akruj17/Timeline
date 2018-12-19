@@ -9,17 +9,21 @@
 import Foundation
 import RealmSwift
 
-class Event: Object, NSCopying{
+class Event: Object, NSCopying, TimeObject{
     @objc dynamic var overview = ""
     @objc dynamic var detailed = ""
-    let year = RealmOptional<Int>()
-    @objc dynamic var isBCE = false
+    let startYear = RealmOptional<Int>()
+    let endYear = RealmOptional<Int>()
+    @objc dynamic var isTimePeriod = false
     @objc dynamic var timeline: Timeline!
     @objc dynamic var id = ""
-    @objc dynamic var editsRequired: [String: Bool] = ["year": false, "overview": false]
+    @objc dynamic var editsRequired: [String: Bool] = ["startYear": false, "endYear": false, "overview": false]
     
     func isEmpty() -> Bool {
-        return (year.value == nil) && overview.isEmpty && detailed.isEmpty
+        if isTimePeriod {
+            return (startYear.value == nil) && (endYear.value == nil) && overview.isEmpty && detailed.isEmpty
+        }
+        return (startYear.value == nil) && overview.isEmpty && detailed.isEmpty
     }
     
     override static func primaryKey() -> String? {
@@ -34,14 +38,27 @@ class Event: Object, NSCopying{
         let copy = Event()
         copy.overview = self.overview
         copy.detailed = self.detailed
-        copy.year.value = self.year.value
-        copy.isBCE = self.isBCE
+        copy.startYear.value = self.startYear.value
+        copy.endYear.value = self.endYear.value
+        copy.isTimePeriod = self.isTimePeriod
         copy.timeline = self.timeline.copy() as! Timeline
         copy.id = self.id
         
         return copy
     }
     
+    var year: Int {
+        get {
+            return startYear.value!
+        }
+    }
+    
+    var event: Event {
+        get {
+            return self
+        } set {
+        }
+    }
 }
 
 class Timeline: Object, NSCopying {
@@ -66,4 +83,33 @@ class Timeline: Object, NSCopying {
 
         return copy
     }
+}
+
+class Period: TimeObject {
+    var isBeginning: Bool!
+    var myEvent: Event!
+    
+    init(event: Event, beginning: Bool) {
+        self.myEvent = event
+        self.isBeginning = beginning
+    }
+    
+    var year: Int {
+        get {
+            return isBeginning ? myEvent.startYear.value! : myEvent.endYear.value!
+        }
+    }
+    
+    var event: Event {
+        get {
+            return myEvent
+        } set {
+            self.myEvent = newValue
+        }
+    }
+}
+
+protocol TimeObject {
+    var year: Int {get}
+    var event: Event {get set}
 }

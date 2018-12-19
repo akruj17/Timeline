@@ -10,9 +10,7 @@ import UIKit
 import RealmSwift
 import ImagePalette
 
-var collectionHeight: CGFloat!
-
-class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, BackgroundModifierDelegate, ImageLayoutDelegate, EventDetailedDelegate {
+class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, BackgroundModifierDelegate, ImageLayoutDelegate, EventDetailedDelegate, EventLayoutDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var navBar: customNavBar!
@@ -22,7 +20,8 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     @IBOutlet weak var loadingBlurContainer: UIView!
     
     var timeline: Timeline!
-    var events: [Event]!
+    var events: [Event]! // solely the events used for loading table view and indexing
+    var eventsForLayout: [TimeObject]! // some events may be duplicated here for laying out periods
     var eventDetailedVC: EventDetailedVC!
     var backgroundModifierVC: BackgroundModifierVC!
     var imageStatusesArray: [imageStatusTuple]!
@@ -41,11 +40,15 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         }
         activityIndicator.startAnimating()
         //initialize variables
-        events = [Event]()
+        if events == nil {
+            events = [Event]()
+        }
+        eventsForLayout = [TimeObject]()
         imageStatusesArray = [imageStatusTuple]()
         if let layout = collectionView?.collectionViewLayout as? TimelineLayout {
             self.layout = layout
             self.layout.delegate = self
+            self.layout.eventDelegate = self
         }
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -72,9 +75,8 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         eventDetailedContainer.layer.borderColor = UIColor.lightGray.cgColor
         eventDetailedContainer.layer.borderWidth = 3
         eventDetailedContainer.layer.cornerRadius = 5
-        
-        //initialize this global variable. This will be used in background processes
-        collectionHeight = collectionView.frame.height
+
+        print("\(imgDirectory)")
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -83,8 +85,8 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         //if the user entered the timeline for the first time, the else statement runs. If they entered from a VC being
         //dismissed, the if portion runs.
         if isInitialized {
-            events.sort(by: {$0.year.value! < $1.year.value!})
-            if events.count < collectionView.numberOfItems(inSection: 1)
+            events.sort(by: {$0.startYear.value! < $1.startYear.value!})
+            if eventsForLayout.count < collectionView.numberOfItems(inSection: 1)
             {
                 let invalidationContext = TimelineInvalidationContext()
                 invalidationContext.numberOfEventsToDrop = collectionView.numberOfItems(inSection: 1) - events.count
@@ -93,23 +95,36 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             }
             collectionView.reloadData()
             collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
-        } 
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         if !isInitialized {
             DispatchQueue.global(qos: .background).sync {
-                let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timeline.name)
-                events = tuple.0
-                // retrieve all image paths for the specific timeline from the filesystem
-                for imagePath in (imageInfo?.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
-                    autoreleasepool {
-                        let img = UIImage(contentsOfFile: imgDirectory.appendingPathComponent("\(imagePath)"))
-                        let imgData = UIImageJPEGRepresentation(img!, 0.3)!
-                        imageStatusesArray.append((imagePath, imgData, false, img!.size))
+                if events.isEmpty {
+                    let tuple = RealmOperator.retrieveEventsFromDatabase(timeline: timeline.name)
+                    events = tuple.0
+                    // retrieve all image paths for the specific timeline from the filesystem
+                    for imagePath in (imageInfo?.value(forKey: IMAGE_ORDERING_ARRAY) as! [String]) {
+                        autoreleasepool {
+                            let img = UIImage(contentsOfFile: imgDirectory.appendingPathComponent("\(imagePath)"))
+                            let imgData = UIImageJPEGRepresentation(img!, 0.3)!
+                            imageStatusesArray.append((imagePath, imgData, false, img!.size))
+                        }
+                    }
+                    updateColorCache()
+                }
+                events.sort(by: {$0.startYear.value! < $1.startYear.value!})
+                // sort the events for layout
+                for event in events {
+                    if (event.isTimePeriod) {
+                        eventsForLayout.append(Period(event: event, beginning: true))
+                        eventsForLayout.append(Period(event: event, beginning: false))
+                    } else {
+                        eventsForLayout.append(event)
                     }
                 }
-                updateColorCache()
+                eventsForLayout.sort(by: {$0.year < $1.year}) // periods and events should now be sorted
                 DispatchQueue.main.async {
                     self.collectionView.reloadData()
                     self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
@@ -119,7 +134,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 backgroundModifierVC.imageStatusesArray = self.imageStatusesArray
             }
             
-            let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+            let when = DispatchTime.now() + 0.1 // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) { [unowned self] in
 
                 self.activityIndicator.stopAnimating()
@@ -181,6 +196,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         incompleteAlert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: {[unowned self] action in
             DispatchQueue.global(qos: .background).sync {
                 RealmOperator.deleteFromDatabase(events: self.events, timeline: self.timeline)
+                FileSystemOperator.deleteTimelineImages(imgDirectory: self.imgDirectory, imageInfo: self.imageInfo!)
                 DispatchQueue.main.async {
                     self.activityIndicator.startAnimating()
                 }
@@ -205,7 +221,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             return imageStatusesArray.count
         }
         else if section == 1 {
-            return events.count
+            return eventsForLayout.count
         }
         else {
             return 0
@@ -215,27 +231,34 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? TimelineImageCell {
-                cell.imgView.image = FileSystemOperator.resizeImage(image: UIImage(data: imageStatusesArray[indexPath.item].data)!, height: collectionHeight)
+                cell.imgView.image = FileSystemOperator.resizeImage(image: UIImage(data:
+                    imageStatusesArray[indexPath.item].data)!, height: collectionHeight)
                 cell.layer.zPosition = 50
                 return cell
             }
         }
         else if indexPath.section == 1 {
-            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "eventCell", for: indexPath) as? TimelineEventBoxCell {
-                let isTopRow = indexPath.item % 2 == 0 ? true: false
-                // firstYear will store whether the event is the first of its year, nil otherwise
-                let firstYear = (indexPath.item == 0 || (events[indexPath.item].year.value! > events[indexPath.item - 1].year.value!)) ? events[indexPath.item].year.value! : nil
-                print("\(indexPath.item)  \(firstYear)")
-                
-                var color: UIColor
-                if indexPath.item < colorCache.count {
-                    color = colorCache[indexPath.item]
-                } else {
-                    color = UIColor.gray
+            let isTopRow = indexPath.item % 2 == 0 ? true: false
+            // firstYear will store whether the event is the first of its year, nil otherwise
+            let firstYear = (indexPath.item == 0 || (eventsForLayout[indexPath.item].year > eventsForLayout[indexPath.item - 1].year)) ? eventsForLayout[indexPath.item].year : nil
+            var color: UIColor
+            if indexPath.item < colorCache.count {
+                color = colorCache[indexPath.item]
+            } else {
+                color = UIColor.gray
+            }
+            if eventsForLayout[indexPath.item] is Period {
+                if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "periodCell", for: indexPath) as? PeriodCell {
+                    cell.configure(isTopRow: isTopRow, title: eventsForLayout[indexPath.item].event.overview, color: color, year: firstYear, isBeginning: (eventsForLayout[indexPath.item] as! Period).isBeginning)
+                    cell.layer.zPosition = 100
+                    return cell
                 }
-                cell.configure(isTopRow: isTopRow, title: events[indexPath.item].overview, color: color, year: firstYear, isTitleScreenEventBox: false)
-                cell.layer.zPosition = 100
-                return cell
+            } else {
+                if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "eventCell", for: indexPath) as? TimelineEventBoxCell {
+                    cell.configure(isTopRow: isTopRow, title: eventsForLayout[indexPath.item].event.overview, color: color, year: firstYear)
+                    cell.layer.zPosition = 100
+                    return cell
+                }
             }
         }
         return UICollectionViewCell()
@@ -248,7 +271,10 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 let blurEffectView = UIVisualEffectView(effect: blurEffect)
                 blurEffectView.frame = self.view.frame
                 self.view.insertSubview(blurEffectView, at: 2)
-                eventDetailedVC.updateAppearance(event: events[indexPath.item], color: colorCache[indexPath.item])
+                let eventAtIndex = eventsForLayout[indexPath.item].event
+                let yearRange = eventsForLayout.last!.year - eventsForLayout.first!.year
+                let yearPercentage: CGFloat = (yearRange == 0) ? 0 : CGFloat(eventAtIndex.year - eventsForLayout.first!.year) / CGFloat(yearRange)
+                eventDetailedVC.updateAppearance(event: eventsForLayout[indexPath.item].event, color: colorCache[indexPath.item], yearPercentage: yearPercentage, index: indexPath.item)
                 eventDetailedContainer.isHidden = false
             }
         }
@@ -262,7 +288,6 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     }
     
     func updateBackgroundImages(imageStatuses: [imageStatusTuple]) {
-        print("\(imageStatuses.count)")
         self.imageStatusesArray = imageStatuses
         // if the layout has already been created, it must be updated
         if layout != nil {
@@ -293,17 +318,38 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
         eventDetailedContainer.isHidden = true
     }
     
+    //
+    
+    func updateEvent(event: Event?, index: Int) {
+        if let newEvent = event {
+            events[index] = newEvent
+        } else { // the event was deleted
+            events.remove(at: index)
+        }
+        collectionView.reloadData()
+    }
+    
 /////IMAGE LAYOUT DELEGATE METHODS
     
     func getSizeAtIndexPath(indexPath: IndexPath) -> CGSize {
         return imageStatusesArray[indexPath.item].largeSize
     }
     
+/////EVENT LAYOUT DELEGATE METHODS
+
+    func isEventAtIndexFirstOfYear(index: Int) -> Bool {
+        return (index == 0 || (eventsForLayout[index].year > eventsForLayout[index - 1].year))
+    }
+    
+    func isTimeObjectPeriod(index: Int) -> Bool {
+        return eventsForLayout[index] is Period
+    }
+    
 /////HELPER METHODS
     
     func updateColorCache() {
         colorCache.removeAll()
-        let eventLength = collectionHeight * 0.9
+        let eventLength = collectionView.frame.height * 0.9
         for image in imageStatusesArray {
             let imageLength: CGFloat = image.largeSize.width * 0.8
             var colorSwatch = UIColor.darkGray
@@ -316,10 +362,9 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                 }
             })
         }
-        if colorCache.count < events.count {
-            for i in colorCache.count ..< events.count {
-                colorCache.append(UIColor.gray)
-            }
+        let currCount = colorCache.count
+        for i in currCount ... eventsForLayout.count {
+            colorCache.append(UIColor.gray)
         }
     }
     

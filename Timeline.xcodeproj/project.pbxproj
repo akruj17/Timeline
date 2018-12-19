@@ -10,6 +10,8 @@
 		A8009C041F2BF77100DD32C3 /* BackgroundModifierLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C031F2BF77100DD32C3 /* BackgroundModifierLayout.swift */; };
 		A8009C061F2BF94300DD32C3 /* ImageCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C051F2BF94300DD32C3 /* ImageCells.swift */; };
 		A8009C081F2FF6BC00DD32C3 /* constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C071F2FF6BC00DD32C3 /* constants.swift */; };
+		A813AA0D200C5C2A00661477 /* PeriodCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A813AA0C200C5C2A00661477 /* PeriodCell.swift */; };
+		A813AA0F200C5CB000661477 /* PeriodEventBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A813AA0E200C5CB000661477 /* PeriodEventBox.swift */; };
 		A8153E5B1EF6138B00A7B02D /* TimelineEventBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E5A1EF6138B00A7B02D /* TimelineEventBox.swift */; };
 		A8153E871F02A97800A7B02D /* TitleScrnLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E861F02A97800A7B02D /* TitleScrnLayout.swift */; };
 		A8153E8B1F02BB3D00A7B02D /* TimelineEventBoxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */; };
@@ -23,6 +25,7 @@
 		A826E8E61F140D770050B625 /* TimelineLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A826E8E51F140D770050B625 /* TimelineLayout.swift */; };
 		A82D89561F095AFD00F769D7 /* EventEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89551F095AFD00F769D7 /* EventEditorCell.swift */; };
 		A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */; };
+		A857D218200BBFB700B258DF /* TableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A857D217200BBFB700B258DF /* TableViewHeader.swift */; };
 		A8641F321FC3DC8F00058F6F /* CacheArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F311FC3DC8F00058F6F /* CacheArray.swift */; };
 		A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F511FCA711B00058F6F /* customNavBar.swift */; };
 		A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86790F01F7C65F700F025F4 /* RealmOperator.swift */; };
@@ -30,6 +33,7 @@
 		A88102581FD32311004045EB /* TitleScreenBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102571FD32311004045EB /* TitleScreenBox.swift */; };
 		A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102591FD32D39004045EB /* TitleScreenCell.swift */; };
 		A8896D3B1F197D4500D62C0F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8896D3A1F197D4500D62C0F /* Event.swift */; };
+		A88F78B220106164006F1EE1 /* Arrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88F78B120106164006F1EE1 /* Arrow.swift */; };
 		A8D451F21F7E16320062FE9D /* FileSystemOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */; };
 		A8F615B01F26AFAD0093254A /* BackgroundModifierVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */; };
 		A8FD345F1F480155009254D6 /* InvalidationContexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FD345E1F480155009254D6 /* InvalidationContexts.swift */; };
@@ -42,6 +46,8 @@
 		A8009C031F2BF77100DD32C3 /* BackgroundModifierLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundModifierLayout.swift; sourceTree = "<group>"; };
 		A8009C051F2BF94300DD32C3 /* ImageCells.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCells.swift; sourceTree = "<group>"; };
 		A8009C071F2FF6BC00DD32C3 /* constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = constants.swift; sourceTree = "<group>"; };
+		A813AA0C200C5C2A00661477 /* PeriodCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodCell.swift; sourceTree = "<group>"; };
+		A813AA0E200C5CB000661477 /* PeriodEventBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodEventBox.swift; sourceTree = "<group>"; };
 		A8153E5A1EF6138B00A7B02D /* TimelineEventBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineEventBox.swift; sourceTree = "<group>"; };
 		A8153E861F02A97800A7B02D /* TitleScrnLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleScrnLayout.swift; sourceTree = "<group>"; };
 		A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineEventBoxCell.swift; sourceTree = "<group>"; };
@@ -57,6 +63,7 @@
 		A826E8E51F140D770050B625 /* TimelineLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineLayout.swift; sourceTree = "<group>"; };
 		A82D89551F095AFD00F769D7 /* EventEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventEditorCell.swift; sourceTree = "<group>"; };
 		A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineTitleEditorCell.swift; sourceTree = "<group>"; };
+		A857D217200BBFB700B258DF /* TableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewHeader.swift; sourceTree = "<group>"; };
 		A8641F311FC3DC8F00058F6F /* CacheArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheArray.swift; sourceTree = "<group>"; };
 		A8641F511FCA711B00058F6F /* customNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customNavBar.swift; sourceTree = "<group>"; };
 		A86790F01F7C65F700F025F4 /* RealmOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmOperator.swift; sourceTree = "<group>"; };
@@ -64,6 +71,7 @@
 		A88102571FD32311004045EB /* TitleScreenBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenBox.swift; sourceTree = "<group>"; };
 		A88102591FD32D39004045EB /* TitleScreenCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenCell.swift; sourceTree = "<group>"; };
 		A8896D3A1F197D4500D62C0F /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		A88F78B120106164006F1EE1 /* Arrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arrow.swift; sourceTree = "<group>"; };
 		A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemOperator.swift; sourceTree = "<group>"; };
 		A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundModifierVC.swift; sourceTree = "<group>"; };
 		A8FD345E1F480155009254D6 /* InvalidationContexts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InvalidationContexts.swift; sourceTree = "<group>"; };
@@ -104,6 +112,7 @@
 			children = (
 				A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */,
 				A82D89551F095AFD00F769D7 /* EventEditorCell.swift */,
+				A857D217200BBFB700B258DF /* TableViewHeader.swift */,
 			);
 			name = "TableView Cells";
 			sourceTree = "<group>";
@@ -114,6 +123,7 @@
 				A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */,
 				A8009C051F2BF94300DD32C3 /* ImageCells.swift */,
 				A88102591FD32D39004045EB /* TitleScreenCell.swift */,
+				A813AA0C200C5C2A00661477 /* PeriodCell.swift */,
 			);
 			name = "CollectionView Cells";
 			sourceTree = "<group>";
@@ -132,7 +142,9 @@
 			children = (
 				A81320001F3E5FC400F805ED /* UICells */,
 				A8153E5A1EF6138B00A7B02D /* TimelineEventBox.swift */,
+				A813AA0E200C5CB000661477 /* PeriodEventBox.swift */,
 				A88102571FD32311004045EB /* TitleScreenBox.swift */,
+				A88F78B120106164006F1EE1 /* Arrow.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -362,11 +374,15 @@
 				A8009C041F2BF77100DD32C3 /* BackgroundModifierLayout.swift in Sources */,
 				A818455E1EF387C500F7BEFB /* TitleScreenVC.swift in Sources */,
 				A826E8E41F13FEEA0050B625 /* TimelineVC.swift in Sources */,
+				A857D218200BBFB700B258DF /* TableViewHeader.swift in Sources */,
+				A813AA0F200C5CB000661477 /* PeriodEventBox.swift in Sources */,
 				A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */,
 				A8D451F21F7E16320062FE9D /* FileSystemOperator.swift in Sources */,
 				A8009C081F2FF6BC00DD32C3 /* constants.swift in Sources */,
+				A88F78B220106164006F1EE1 /* Arrow.swift in Sources */,
 				A8153E8B1F02BB3D00A7B02D /* TimelineEventBoxCell.swift in Sources */,
 				A875E9681F89439700AD70EA /* EventDetailedVC.swift in Sources */,
+				A813AA0D200C5C2A00661477 /* PeriodCell.swift in Sources */,
 				A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */,
 				A818455C1EF387C500F7BEFB /* AppDelegate.swift in Sources */,
 				A8009C061F2BF94300DD32C3 /* ImageCells.swift in Sources */,
@@ -511,14 +527,18 @@
 			baseConfigurationReference = 1BAB4CCF50200FB65ABE1659 /* Pods-Timeline.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3FL68T5VY9;
 				INFOPLIST_FILE = Timeline/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "edumacation-.Timeline";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -527,14 +547,18 @@
 			baseConfigurationReference = 53734F8FE5D7C4FB2AF8CC49 /* Pods-Timeline.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3FL68T5VY9;
 				INFOPLIST_FILE = Timeline/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "edumacation-.Timeline";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};

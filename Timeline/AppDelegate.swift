@@ -33,9 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 try! fileManager.createDirectory(atPath: firstImagesPath, withIntermediateDirectories: false, attributes: nil)
             }
         }
-        let direc = documents.appendingPathComponent(TIMELINE_IMAGE_DIRECTORY) as NSString
-        print("\(direc)")
-
         return true
     }
 
@@ -47,9 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        let vc = UIApplication.shared.keyWindow?.rootViewController?.childViewControllers
-//        print("\(vc?.isKind(of: TimelineVC.self))")
-        print("\(vc!)")
 
     }
 
