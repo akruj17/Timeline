@@ -10,33 +10,55 @@ import UIKit
 
 class Arrow: UIView {
     
-    var color: UIColor!
+    let tail = UIView()
+    let head1 = UIView()
+    let head2 = UIView()
+    
+    var _pointsRight = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        commonInit()
        
     }
     
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        commonInit()
     }
     
-    override func draw(_ rect: CGRect) {
-        let arrowStick = UIView(frame: CGRect(x: 0, y: (3 * frame.height / 8), width: frame.width, height: PERIOD_CELL_BORDER))
-        // arrowHead will be at 30 degree angles to the stick
-        let rotationAngle: CGFloat = .pi / 6
-        let arrowHeadLength = ((rect.height - PERIOD_CELL_BORDER) / 2) / sin(rotationAngle)
-        let arrowHeadTop = UIView(frame: CGRect(x: arrowStick.frame.maxX - (cos(rotationAngle) * (arrowHeadLength / 2)) - (arrowHeadLength / 2), y: arrowStick.frame.minY - ((arrowHeadLength / 2) * sin(rotationAngle)), width: arrowHeadLength, height: PERIOD_CELL_BORDER))
-        let arrowHeadBottom = UIView(frame: CGRect(x: arrowStick.frame.width - (cos(-1 * rotationAngle) * (arrowHeadLength / 2)) - (arrowHeadLength / 2), y: arrowStick.frame.minY + (sin(rotationAngle) * (arrowHeadLength / 2)), width: arrowHeadLength, height: PERIOD_CELL_BORDER))
-        arrowStick.backgroundColor = color
-        arrowHeadTop.backgroundColor = color
-        arrowHeadBottom.backgroundColor = color
-        arrowHeadTop.transform = CGAffineTransform(rotationAngle: rotationAngle)
-        arrowHeadBottom.transform = CGAffineTransform(rotationAngle: -1 * rotationAngle)
-        self.addSubview(arrowStick)
-        self.addSubview(arrowHeadTop)
-        self.addSubview(arrowHeadBottom)
+    func commonInit() {
+        tail.frame = CGRect(x: -1 * (PERIOD_CELL_BORDER / 2), y: (frame.height / 2) - (PERIOD_CELL_BORDER / 2), width: frame.width, height: PERIOD_CELL_BORDER)
+        let rotationAngle: CGFloat = .pi * (30.0 / 180.0)
+        let headLength = ((frame.height - PERIOD_CELL_BORDER) / 2) / sin(rotationAngle)
+        head1.frame = CGRect(x: tail.frame.maxX - (cos(rotationAngle) * (headLength / 2)) - (headLength / 2), y: tail.frame.minY - ((headLength / 2) * sin(rotationAngle)), width: headLength, height: PERIOD_CELL_BORDER)
+        head2.frame = CGRect(x: tail.frame.maxX - (cos(-1 * rotationAngle) * (headLength / 2)) - (headLength / 2), y: tail.frame.minY + (sin(rotationAngle) * (headLength / 2)), width: headLength, height: PERIOD_CELL_BORDER)
+        head1.transform = CGAffineTransform(rotationAngle: rotationAngle)
+        head2.transform = CGAffineTransform(rotationAngle: -1 * rotationAngle)
+        self.addSubview(tail)
+        self.addSubview(head1)
+        self.addSubview(head2)
         self.backgroundColor = UIColor.clear
+    }
+    
+    override var tintColor: UIColor? {
+        get {
+            return super.tintColor
+        } set (v) {
+            super.tintColor = v
+            tail.backgroundColor = v
+            head1.backgroundColor = v
+            head2.backgroundColor = v
+        }
+    }
+    
+    var pointsRight: Bool {
+        get {
+            return _pointsRight
+        } set (v) {
+            _pointsRight = v
+            self.transform = CGAffineTransform(rotationAngle: (_pointsRight ? 0 : .pi))
+        }
     }
 
 }

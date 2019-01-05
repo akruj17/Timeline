@@ -61,19 +61,16 @@ class TimelineLayout: UICollectionViewLayout {
                     row = 1
                 }
             }
-            
             for item in eventCache.count ..< collectionView!.numberOfItems(inSection: 1) {
                 let indexPath = IndexPath(item: item, section: 1)
-
+            
                 var frame = CGRect()
                 var cellHeight: CGFloat = contentHeight * 0.3 // default for events
-                var yPos: CGFloat = (row % 2 == 0) ? ((contentHeight / 2) - 5) - cellHeight : (contentHeight / 2) + 5
+                var yPos: CGFloat = (row % 2 == 0) ? ((contentHeight / 2) - (CGFloat(TIMELINE_LINE_HEIGHT / 2))) - cellHeight : (contentHeight / 2) + CGFloat(TIMELINE_LINE_HEIGHT / 2)
                 if eventDelegate.isTimeObjectPeriod(index: item) {
-                    cellHeight = 0.85 * contentHeight
-                    if row == 0 {
-                        yPos = contentHeight * 0.1
-                    } else {
-                        yPos = contentHeight * 0.05
+                    cellHeight = (0.7 * contentHeight) + CGFloat(TIMELINE_LINE_HEIGHT / 2)
+                    if row == 1 {
+                        yPos = ((contentHeight / 2) - (0.4 * contentHeight))
                     }
                 }
                 frame = CGRect(x: xOffset[row], y: yPos, width: (0.7 * eventCellWidth), height: cellHeight)

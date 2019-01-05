@@ -11,7 +11,7 @@ import UIKit
 class customNavBar: UINavigationBar {
         
     //set NavigationBar's height
-    var customHeight : CGFloat = 66
+    var customHeight : CGFloat = 60
         
     override func sizeThatFits(_ size: CGSize) -> CGSize {
             

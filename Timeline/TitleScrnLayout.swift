@@ -17,29 +17,35 @@ class TitleScrnLayout: UICollectionViewLayout {
     //the total width of the title cells, up until the final edge of the "New Timeline" cell
     var contentWidth: CGFloat = 0
     var cache = [UICollectionViewLayoutAttributes]()
-    
+    var delegate: TitleCollectionDelegate!
     
     override func prepare() {
         //this method should only execute if the layout has not been setup, OR if a title cell was added or removed
-        if cache.count != collectionView?.numberOfItems(inSection: 0) {
+        if cache.count != collectionView!.numberOfItems(inSection: 0) {
             //The height of each row, which accounts for the central line which is 5 pixels tall
-            let rowHeight = (contentHeight / CGFloat(2)) - 2.5
+            let rowHeight = (contentHeight / CGFloat(2)) - (TITLE_LINE_HEIGHT / 2)
             let titleCellHeight = 0.85 * rowHeight //height of each cell with a timeline title
-            
+            //TITLE CELL WIDTH = BOX WIDTH + PADDING
             let titleCellWidth = titleCellHeight
             let titleBoxWidth = 0.7 * titleCellWidth
-            let padding = 0.3 * titleCellWidth
             
-            let yOffset: [CGFloat] = [rowHeight - titleCellHeight, rowHeight + 2.5]
-            var xOffset: [CGFloat] = [0, (titleBoxWidth / 2) + (padding / 2)]
+            let yOffset: [CGFloat] = [rowHeight - titleCellHeight, rowHeight + (TITLE_LINE_HEIGHT / 2)]
+            var xOffset: [CGFloat] = [0, (titleCellWidth / 2)]
             var row = 0
             
             if cache.isEmpty {
+                //starting from scratch. Layout is being initialized
                 contentWidth = 0
-            } else {  //The "new timeline" cell has already been invalidated
-                contentWidth = cache.last!.frame.minX + titleCellWidth //end point for last cell
+            } else {
+                //The length of the cache must be at least one because of the "new timeline" cell
+                assert(cache.count >= 1)
+                //remove the "new timeline" cell first, we will append it later, and we may need to delete events instead of insert
+                let numToRemove = cache.count - collectionView!.numberOfItems(inSection: 0)
+                cache.removeLast((numToRemove > 0) ? (numToRemove + 1) : 1)
+                //end point for last cell
+                contentWidth = (cache.last == nil) ? 0 : cache.last!.frame.minX + titleCellWidth
                 //end point for second to last cell, and where the first new cell will placed
-                var startPoint: CGFloat = (cache.count == 1) ? xOffset[1] : cache[cache.count - 2].frame.minX + titleCellWidth
+                let startPoint = (cache.count <= 1) ? xOffset[cache.count] : cache[cache.count - 2].frame.minX + titleCellWidth
                 if cache.count % 2 == 0 {
                     //the next cell put down will be on the top row
                     xOffset = [startPoint, contentWidth]
@@ -49,30 +55,24 @@ class TitleScrnLayout: UICollectionViewLayout {
                 }
             }
             
-            let numberOfItems = collectionView!.numberOfItems(inSection: 0)
-            for item in cache.count ..< numberOfItems {
+            let numTitles = collectionView!.numberOfItems(inSection: 0) - 1
+            //add cells for the regular titles
+            for item in cache.count ..< numTitles {
                 let indexPath = IndexPath(item: item, section: 0)
-                var frame = CGRect()
-                if item == (numberOfItems - 1) {
-                    if item % 2 == 0 {
-                        frame = CGRect(x: xOffset[row], y: 0, width: (0.7 * rowHeight), height: rowHeight)
-                    } else {
-                        frame = CGRect(x: xOffset[row], y: yOffset[row], width: (0.7 * rowHeight), height: rowHeight)
-                    }
-                    xOffset[row] += (0.7 * rowHeight)
-                } else {
-                    frame = CGRect(x: xOffset[row], y: yOffset[row], width: titleBoxWidth, height: titleCellHeight)
-                    xOffset[row] += titleCellWidth
-                }
-                
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-                attributes.frame = frame
-                cache.append(attributes)
-                
+                attributes.frame = CGRect(x: xOffset[row], y: yOffset[row], width: titleBoxWidth, height: titleCellHeight)
+                xOffset[row] += titleCellWidth
+                cache.append(attributes)   // make this second to last element
                 row = (row + 1) > 1 ? 0: 1
             }
-            
+            //now add "new timeline" cell
+            let new_timeline_cell = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: cache.count, section: 0))
+            new_timeline_cell.frame = CGRect(x: xOffset[row], y: (cache.count % 2 == 0) ? 0 : yOffset[row], width: 0.7 * rowHeight, height: rowHeight)
+            xOffset[row] += (0.7 * rowHeight)
+            cache.append(new_timeline_cell)
+            //update contentWidth
             contentWidth = max(xOffset[0], xOffset[1])
+            delegate.updateCollectionWidth(newWidth: contentWidth)
         }
     }
     
@@ -85,12 +85,16 @@ class TitleScrnLayout: UICollectionViewLayout {
         if cache.isEmpty {
             self.prepare()
         }
+        var found = false //allows breaking early since attributes are ordered
         for attributes in cache {
             if attributes.frame.intersects(rect) {
                 if ((attributes.frame.origin.x + attributes.frame.size.width <= self.collectionViewContentSize.width) &&
                     (attributes.frame.origin.y + attributes.frame.size.height <= self.collectionViewContentSize.height)) {
-                layoutAttributes.append(attributes)
+                    layoutAttributes.append(attributes)
+                    found = true
                 }
+            } else if found {
+                break
             }
         }
 
@@ -106,5 +110,6 @@ class TitleScrnLayout: UICollectionViewLayout {
             cache.removeLast(invalidatedPaths.count)
         }
     }
+
     
 }

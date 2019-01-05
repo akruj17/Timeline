@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="LoadingScreen" customModule="Timeline" customModuleProvider="target">
+            <connections>
+                <outlet property="contentView" destination="iN0-l3-epB" id="Rik-Du-zxC"/>
+                <outlet property="indicatorView" destination="hWl-cP-rsJ" id="J1n-EG-kMu"/>
+                <outlet property="label" destination="jg5-Mk-nHO" id="MTM-p9-Qgh"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view opaque="NO" contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SVy-c8-SSC">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="vph-5g-avk">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remember to look at the bigger picture!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jg5-Mk-nHO">
+                                <rect key="frame" x="0.0" y="382" width="375" height="44"/>
+                                <fontDescription key="fontDescription" name="AvenirNext-UltraLight" family="Avenir Next" pointSize="32"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="jg5-Mk-nHO" secondAttribute="trailing" id="wke-96-pFS"/>
+                            <constraint firstItem="jg5-Mk-nHO" firstAttribute="leading" secondItem="vph-5g-avk" secondAttribute="leading" id="ww5-LL-9lr"/>
+                        </constraints>
+                    </view>
+                    <blurEffect style="regular"/>
+                </visualEffectView>
+                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="hWl-cP-rsJ">
+                    <rect key="frame" x="169" y="315" width="37" height="37"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="37" id="6e9-kE-KNr"/>
+                        <constraint firstAttribute="width" constant="37" id="mfK-D8-Qwz"/>
+                    </constraints>
+                    <color key="color" red="0.92549019610000005" green="0.41176470590000003" blue="0.32549019610000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                </activityIndicatorView>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="jg5-Mk-nHO" firstAttribute="top" secondItem="hWl-cP-rsJ" secondAttribute="bottom" constant="30" id="2YL-Kr-8hX"/>
+                <constraint firstItem="SVy-c8-SSC" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="6Ew-Lf-w2q"/>
+                <constraint firstItem="hWl-cP-rsJ" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="HyV-nH-xaD"/>
+                <constraint firstItem="SVy-c8-SSC" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="Mzk-AZ-hyg"/>
+                <constraint firstItem="SVy-c8-SSC" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="NAm-vL-9X2"/>
+                <constraint firstItem="SVy-c8-SSC" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="WVJ-ej-joc"/>
+                <constraint firstItem="hWl-cP-rsJ" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="ePx-hK-Lsa"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <point key="canvasLocation" x="0.80000000000000004" y="28.335832083958024"/>
+        </view>
+    </objects>
+</document>

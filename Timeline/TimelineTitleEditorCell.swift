@@ -11,7 +11,7 @@ import UIKit
 class TimelineTitleEditorCell: UITableViewCell, UITextFieldDelegate {
 
     @IBOutlet weak var titleLbl: UITextField!
-    var timelineTitle: Timeline!
+    var delegate : EditorDataSaveDelegate!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -26,23 +26,22 @@ class TimelineTitleEditorCell: UITableViewCell, UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         if textField.layer.borderColor == UIColor.red.cgColor {
             textField.layer.borderColor = UIColor.darkGray.cgColor
-            timelineTitle.editsRequired = false
         }
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if let title = titleLbl.text {
-            timelineTitle.name = title
+            delegate.saveTitle(title: title)
+            if  title.replacingOccurrences(of: " ", with: "") == "" {
+                // the title is invalid. Empty or consisting of solely spaces
+                // mark the field as incomplete
+                textField.layer.borderColor = UIColor.red.cgColor
+            }
         }
     }
     
-    func configure(timeline: Timeline) {
-        timelineTitle = timeline
+    func configure(timeline: Timeline, invalid: Bool) {
         titleLbl.text? = timeline.name
-        if timeline.editsRequired {
-            titleLbl.layer.borderColor = UIColor.red.cgColor
-        }
+        titleLbl.layer.borderColor = invalid ? UIColor.red.cgColor : UIColor.darkGray.cgColor
     }
-
-    
 }

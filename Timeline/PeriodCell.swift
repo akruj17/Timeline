@@ -9,23 +9,10 @@
 import UIKit
 
 class PeriodCell: UICollectionViewCell {
-    @IBOutlet weak var periodBox: PeriodEventBox!
+    @IBOutlet weak var periodBox: PeriodBox!
     
-    func configure(isTopRow: Bool, title: String, color: UIColor, year: Int? = nil, isBeginning: Bool) {
-        periodBox.isTopRow = isTopRow
-        periodBox.isBeginning = isBeginning
-        periodBox.stringVal = title
-        periodBox.color = color
-        
-        if let firstYear = year {
-            periodBox.isFirstOfYear = true
-            periodBox.year = firstYear
-        } else {
-            periodBox.isFirstOfYear = false
-            periodBox.year = nil
-        }
-        
-        periodBox.setNeedsDisplay()
+    func configure(isTopRow: Bool, overview: String, color: UIColor, year: Int?, isBeginning: Bool) {
+        periodBox.configure(isTop: isTopRow, color: color, overview: overview, year: year, isBeginning: isBeginning)
     }
     
 }

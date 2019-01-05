@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Timeline/TimelineLayout.swift"
-            timestampString = "538713598.926931"
+            timestampString = "568317569.249754"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "140"
-            endingLineNumber = "140"
+            startingLineNumber = "137"
+            endingLineNumber = "137"
             landmarkName = "resizeImage(originalSize:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Timeline/TimelineLayout.swift"
-            timestampString = "538713598.927022"
+            timestampString = "568317569.249885"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167">
+            startingLineNumber = "164"
+            endingLineNumber = "164">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -13,17 +13,30 @@ class FileSystemOperator {
     
     static let fileManager = FileManager.default
     
-    //create an image directory for a a new timeline
-    static func createImageDirectory(name: String) {
+    //create an image directory for a a new timeline. Returns true if created; false if already existing
+    static func createImageDirectory(name: String) -> Bool {
+        var created = false
         let direc = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(name)") as NSString
-        try! fileManager.createDirectory(atPath: direc as String, withIntermediateDirectories: true, attributes: nil)
+        if !fileManager.fileExists(atPath: direc as String) {
+            //does not yet exist
+            try! fileManager.createDirectory(atPath: direc as String, withIntermediateDirectories: true, attributes: nil)
+            created = true
+        }
         //Create plist file for image info
         let imageInfoFile = direc.appendingPathComponent("\(IMAGE_INFO_PLIST)") as NSString
-        let data = NSMutableDictionary()
-        data.setValue(0, forKey: IMAGE_COUNTER)
-        data.setValue([String](), forKey: IMAGE_ORDERING_ARRAY)
-        data.write(toFile: imageInfoFile as String, atomically: false)
+        if !fileManager.fileExists(atPath: imageInfoFile as String) {
+            let data = NSMutableDictionary()
+            data.setValue(0, forKey: IMAGE_COUNTER)
+            data.setValue([String](), forKey: IMAGE_ORDERING_ARRAY)
+            data.write(toFile: imageInfoFile as String, atomically: false)
+            created = true
+        }
+        return created
     }
+    
+//    static func retrieveImages(name: String) ->
+    
+    
     
     
     static func updateImagesInFileSystem(imageStatusData: [imageStatusTuple], imagePathsToDelete: [String], imageDirectory: NSString, startCounter: Int, imageInfo: NSMutableDictionary, pListPath: NSString, timelineTitle: String) {
@@ -34,7 +47,7 @@ class FileSystemOperator {
                     let imgPath = imageDirectory.appendingPathComponent("\(path)")
                     try fileManager.removeItem(atPath: imgPath)
                 }
-                catch let error as NSError {
+                catch _ as NSError {
                     fatalError()
                 }
             }
@@ -55,7 +68,7 @@ class FileSystemOperator {
                     if index == randomIndex {
                         let firstImageDirectory = documents.appendingPathComponent("\(TIMELINE_IMAGE_DIRECTORY)/\(FIRST_IMAGES_DIRECTORY)") as NSString
                         let imageFile = firstImageDirectory.appendingPathComponent("\(timelineTitle).jpg")
-                        fileManager.createFile(atPath: imageFile, contents: UIImageJPEGRepresentation(UIImage(data: image.data)!, 0.3)!, attributes: nil)
+                        fileManager.createFile(atPath: imageFile, contents: UIImage(data: image.data)!.jpegData(compressionQuality: 0.3)!, attributes: nil)
                     }
                 }
             }
@@ -83,7 +96,7 @@ class FileSystemOperator {
                     try fileManager.removeItem(atPath: imgDirectory.appendingPathComponent("\(imagePath)"))
                 }
                 try fileManager.removeItem(atPath: imgDirectory as String)
-            } catch let error as NSError {
+            } catch _ as NSError {
                 fatalError()
             }
         }

@@ -81,8 +81,8 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         setEnabledButtons()
         
         //set up notifications so that if the user quits the app mid modification, changes will still be saved.
-        let notificationCenter = NotificationCenter.default
-//        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: Notification.Name.UIApplicationWillResignActive, object: nil)
+        //let notificationCenter = NotificationCenter.default
+        //notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: Notification.Name.UIApplicationWillResignActive, object: nil)
         
         //this initializes the background in the actual timeline
         delegate!.updateBackgroundImages(imageStatuses: imageStatusesArray)
@@ -117,18 +117,18 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     @IBAction func moveToFrontPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .moveToFront)
-        reloadLayout(updateType: .moveToFront)
+        updateImageStatusesArray(updateType: .MOVE_FRONT)
+        reloadLayout(updateType: .MOVE_FRONT)
     }
     
     @IBAction func moveToEndPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .moveToEnd)
-        reloadLayout(updateType: .moveToEnd)
+        updateImageStatusesArray(updateType: .MOVE_END)
+        reloadLayout(updateType: .MOVE_END)
     }
     
     @IBAction func deleteImagesPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .delete)
-        reloadLayout(updateType: .delete)
+        updateImageStatusesArray(updateType: .DELETE)
+        reloadLayout(updateType: .DELETE)
     }
     
     @IBAction func donePressed(_ sender: Any) {
@@ -170,11 +170,11 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             !($0.0 == nil)
         })
 
-        if updateType == .moveToFront {
+        if updateType == .MOVE_FRONT {
             imageStatusesArray.insert(contentsOf: tempImageData, at: 0)
-        } else if updateType == .moveToEnd {
+        } else if updateType == .MOVE_END {
             imageStatusesArray.append(contentsOf: tempImageData)
-        } else if updateType == .delete {
+        } else if updateType == .DELETE {
             for image in tempImageData {
                 if let path = image.filePath {
                     deletedPaths.append(path)
@@ -188,7 +188,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     private func reloadLayout(updateType: UpdateAction) {
-        if updateType != UpdateAction.insert {
+        if updateType != UpdateAction.INSERT {
             //insertion requires extra work and isn't handled here
             let invalidationContext = BackgroundModifierInvalidationContext()
             invalidationContext.updateType = updateType
@@ -248,7 +248,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     
     @objc func handleLongGesture(_ gesture: UILongPressGestureRecognizer) {
         switch(gesture.state) {
-        case UIGestureRecognizerState.began:
+        case UIGestureRecognizer.State.began:
             guard let selectedIndexPath = self.collectionView.indexPathForItem(at: gesture.location(in: self.collectionView)) else {
                 break
             }
@@ -258,11 +258,11 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                 lblMessage.text = "❗️Make sure all images are unselected before reordering ❗️"
                 lblMessage.textColor = UIColor.red
             }
-        case UIGestureRecognizerState.changed:
+        case UIGestureRecognizer.State.changed:
             if true {
                 collectionView.updateInteractiveMovementTargetPosition(gesture.location(in: gesture.view!))
             }
-        case UIGestureRecognizerState.ended:
+        case UIGestureRecognizer.State.ended:
             shouldRefresh = false
             collectionView.endInteractiveMovement()
             collectionView.reloadData()
@@ -321,7 +321,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                     autoreleasepool {
                     let newWidth = (collectionHeight / CGFloat(asset.pixelHeight)) * CGFloat(asset.pixelWidth)
                     photoManager.requestImage(for: asset, targetSize: CGSize(width: newWidth, height: collectionHeight), contentMode: PHImageContentMode.aspectFit, options: options, resultHandler: {[unowned self] (result, info) in
-                        let imageData = UIImageJPEGRepresentation(result!, 0.3)!
+                        let imageData = result!.jpegData(compressionQuality: 0.3)!
                         self.imageStatusesArray.insert((filePath: nil, data: imageData, selectedStat: false, largeSize: result!.size), at: self.insertionIndex + index)
                             indexPaths.append(IndexPath(item: self.insertionIndex + index, section: 0))
                         })
@@ -331,14 +331,18 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                     if assets.count > 0 {
                     //the following code updates the layout if images were added to the background
                         let invalidationContext = BackgroundModifierInvalidationContext()
-                        invalidationContext.updateType = .insert
+                        invalidationContext.updateType = .INSERT
                         invalidationContext.insertionCount = indexPaths.count
                         invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
                         self.layout.invalidateLayout(with: invalidationContext)
-                        self.reloadLayout(updateType: .insert)
+                        self.reloadLayout(updateType: .INSERT)
                     }
                 }
 
             }, completion: nil)
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
     }
 }

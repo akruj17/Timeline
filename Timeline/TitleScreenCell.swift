@@ -10,18 +10,14 @@ import UIKit
 
 class TitleScreenCell: UICollectionViewCell {
     
-    @IBOutlet weak var titleBox: TitleScreenBox!
+    @IBOutlet weak var titleBox: TitleBox!
     
-    func configure(isTopRow: Bool, title: String, color: UIColor, image: Data?) {
-        titleBox.isTopRow = isTopRow
-        titleBox.stringVal = title
-        titleBox.color = color
-        if let imageData = image {
-            titleBox.image = UIImage(data: imageData)
-        } else {
-            titleBox.image = nil
-        }
-        
-        titleBox.setNeedsDisplay()
+    func configure(isTopRow: Bool, title: String, isLoading: Bool) {
+        titleBox.configure(title: title, isTop: isTopRow)
+        titleBox.isLoading = isLoading
+    }
+    
+    func setLoading(isLoading: Bool) {
+        titleBox.isLoading = isLoading
     }
 }

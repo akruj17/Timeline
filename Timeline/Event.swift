@@ -17,7 +17,6 @@ class Event: Object, NSCopying, TimeObject{
     @objc dynamic var isTimePeriod = false
     @objc dynamic var timeline: Timeline!
     @objc dynamic var id = ""
-    @objc dynamic var editsRequired: [String: Bool] = ["startYear": false, "endYear": false, "overview": false]
     
     func isEmpty() -> Bool {
         if isTimePeriod {
@@ -29,10 +28,6 @@ class Event: Object, NSCopying, TimeObject{
     override static func primaryKey() -> String? {
         return "id"
     }
-    
-    override static func ignoredProperties() -> [String] {
-        return ["editsRequired"]
-    }
 
     func copy(with zone: NSZone? = nil) -> Any {
         let copy = Event()
@@ -41,7 +36,7 @@ class Event: Object, NSCopying, TimeObject{
         copy.startYear.value = self.startYear.value
         copy.endYear.value = self.endYear.value
         copy.isTimePeriod = self.isTimePeriod
-        copy.timeline = self.timeline.copy() as! Timeline
+        copy.timeline = self.timeline.copy() as? Timeline
         copy.id = self.id
         
         return copy
@@ -110,6 +105,6 @@ class Period: TimeObject {
 }
 
 protocol TimeObject {
-    var year: Int {get}
     var event: Event {get set}
+    var year: Int {get}
 }

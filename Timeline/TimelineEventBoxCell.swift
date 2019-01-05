@@ -10,23 +10,10 @@ import UIKit
 
 class TimelineEventBoxCell: UICollectionViewCell {
     
-    @IBOutlet weak var timelineBox: TimelineEventBox!
+    @IBOutlet weak var eventBox: EventBox!
     
-    func configure(isTopRow: Bool, title: String, color: UIColor, year: Int? = nil) {
-        timelineBox.isTopRow = isTopRow
-        
-        timelineBox.stringVal = title
-        timelineBox.color = color
-        
-        if let firstYear = year {
-            timelineBox.isFirstOfYear = true
-            timelineBox.year = firstYear
-        } else {
-            timelineBox.isFirstOfYear = false
-            timelineBox.year = nil
-        }
-        
-        timelineBox.setNeedsDisplay()
+    func configure(isTopRow: Bool, overview: String, color: UIColor, year: Int?) {
+        eventBox.configure(isTop: isTopRow, year: year, overview: overview, color: color)
     }
     
 }

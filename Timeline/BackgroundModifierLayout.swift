@@ -147,7 +147,7 @@ class BackgroundModifierLayout: UICollectionViewLayout {
     override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
         if let cont = context as? BackgroundModifierInvalidationContext {
             switch cont.updateType! {
-            case .insert:
+            case .INSERT:
                 if let startIndex = cont.invalidatedItemIndexPaths?[0].item {
                     if cache.count != startIndex {
                         cache.removeSubrange(startIndex...(cache.count - 1))
@@ -159,7 +159,7 @@ class BackgroundModifierLayout: UICollectionViewLayout {
                         imageSizeCache.insert(resizeImage(originalSize: originalSize), at: insertionIndex)
                     }
                 }
-            case .delete:
+            case .DELETE:
                 if let startIndex = cont.invalidatedItemIndexPaths?.sorted()[0].item {
                     cache.removeSubrange(startIndex...(cache.count - 1))
                 }
@@ -171,7 +171,7 @@ class BackgroundModifierLayout: UICollectionViewLayout {
                 imageSizeCache = imageSizeCache.filter({
                     !($0 == -1.0)
                 })
-            case .moveToFront:
+            case .MOVE_FRONT:
                 cache.removeAll()
                 
                 var tempSizes = [CGFloat]()
@@ -185,7 +185,7 @@ class BackgroundModifierLayout: UICollectionViewLayout {
                 })
                 
                 imageSizeCache.insert(contentsOf: tempSizes, at: 0)
-            case .moveToEnd:
+            case .MOVE_END:
                 if let startIndex =  cont.invalidatedItemIndexPaths?.sorted()[0].item {
                     cache.removeSubrange(startIndex...(cache.count - 1))
                 }
@@ -202,8 +202,8 @@ class BackgroundModifierLayout: UICollectionViewLayout {
                 
                 imageSizeCache.append(contentsOf: tempSizes)
 
-            default:
-                super.invalidateLayout(with: cont)
+//            default:
+//                super.invalidateLayout(with: cont)
             }
         }
     }

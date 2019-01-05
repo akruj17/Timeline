@@ -52,7 +52,7 @@ extension UIView {
         animation.toValue = toValue
         animation.duration = duration
         animation.isRemovedOnCompletion = true
-        animation.fillMode = kCAFillModeForwards
+        animation.fillMode = CAMediaTimingFillMode.forwards
         self.layer.add(animation, forKey: nil)
     }
 }
