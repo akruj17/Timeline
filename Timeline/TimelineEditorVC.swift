@@ -13,7 +13,6 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var doneButton: UIBarButtonItem!
-    @IBOutlet weak var loadingScreen: LoadingScreen!
     @IBOutlet weak var navItems: UINavigationItem!
     
     // ALL THE DATA
@@ -28,21 +27,28 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     var requiresEdits = false
     var mode = NEW
     weak var titleDelegate: CollectionReloadDelegate!
+    weak var titleScreen: TitleScreenVC!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
-        AppUtility.lockOrientation(.all)
+        if self.view.traitCollection.horizontalSizeClass == .regular {
+            AppUtility.lockOrientation(.all)
+        } else {
+            AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
+        }
         tableView.dataSource = self
         tableView.delegate = self
         //If the timeline is being created for the first time, fields should appear empty. Otherwise, fields should be filled with prior data from database.
         if mode == NEW {
             timelineTitle = Timeline()
-            
             eventInfoArray = [Event]()
+            realmOperator = RealmOperator(_timeline: timelineTitle)
             initializeNumRows(rows: 5)
         } else if mode == INVALID {
             // eventInfoArray and timelineTitle should already be instantiated
+            realmOperator = RealmOperator(_timeline: timelineTitle)
+            print("\(eventInfoArray.count)")
             if eventInfoArray.count == 0 {
                 initializeNumRows(rows: 5)
             }
@@ -50,22 +56,23 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         } else {
             //only present cancel option for new timelines that have not been validated
             navItems.leftBarButtonItem = nil
+            for _ in eventInfoArray {
+                editsTracker.append([false, false, false])
+            }
         }
-
-        realmOperator = RealmOperator(_timeline: timelineTitle)
     }
-    
+
     
     override func viewWillAppear(_ animated: Bool) {
         tableView.reloadData()
     }
-    
     
 /////IB ACTION METHODS
     
     //Add a new event form to the table when the addEvent button is pressed
     @IBAction func addEventPressed(_ sender: Any) {
         initializeNumRows(rows: 1)
+        tableView.scrollToRow(at: IndexPath(row: eventInfoArray.count - 1, section: 1), at: .bottom, animated: false)
     }
     
     
@@ -89,8 +96,12 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                 self.presentIncompleteMessage(requiresEdits: valid.requiresEdits)
             } else {
                 //TIMELINE IS VALID
-                self.loadingScreen.isHidden = false
-                self.titleDelegate.updateCollection(updateType: .INSERT, completion: nil)
+                if self.mode == NEW {
+                    self.titleDelegate.updateCollection(completion: nil)
+                } else if self.mode == MODIFY {
+                    self.navigationController?.popViewController(animated: true)
+                    return
+                }
                 self.performSegue(withIdentifier: "editorToTimeline", sender: nil)
             }
         }
@@ -121,8 +132,10 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         let incompleteAlert = UIAlertController(title: "Warning", message: nil, preferredStyle: .alert)
         incompleteAlert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: {[unowned self] action in
             //the user has confirmed they would like to delete the timeline
-            self.realmOperator.deleteTimeline()
-            self.navigationController?.popToRootViewController(animated: true)
+            RealmOperator.deleteTimeline(title: self.timelineTitle)
+            self.titleDelegate.updateCollection(completion: { (unused) in
+                self.navigationController?.popToRootViewController(animated: true)
+            })
         }))
         incompleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         incompleteAlert.title = "Are you sure you want to delete this timeline? This action cannot be undone later."
@@ -156,7 +169,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
             }
         }
         else {
-            if let cell = tableView.dequeueReusableCell(withIdentifier: "eventFormCell", for: indexPath) as? EventEditorCell {
+            if let cell = tableView.dequeueReusableCell(withIdentifier: (self.view.traitCollection.horizontalSizeClass == .regular) ? "eventFormCell" : "eventFormCompactCell", for: indexPath) as? EventEditorCell {
                 cell.configure(index: indexPath.row + 1, event: eventInfoArray[indexPath.row], invalid: editsTracker[indexPath.row])
                 cell.delegate = self
                 return cell
@@ -167,7 +180,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0 {
-            return 100
+            return (self.view.traitCollection.horizontalSizeClass == .regular) ? 100 : 60
         }
         return 300
     }
@@ -242,10 +255,10 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
             eventInfoArray.append(event)
             indexPaths.append(IndexPath(row: eventInfoArray.count - 1, section: 1))
             editsTracker.append([false, false, false])
+            realmOperator.persistEventField(event: event, field: nil, type: .DEFAULT, sync: false)
         }
         tableView.reloadData()
     }
-    
     
     //verify timeline event fields are properly completed
     private func performValidation(events: [Event]) -> Bool {
@@ -281,12 +294,10 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         return requiresEdits
     }
     
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "editorToTimeline" {
             if let timelineVC = segue.destination as? TimelineVC {
                 timelineVC.timeline = timelineTitle
-                timelineVC.events = eventInfoArray
                 timelineVC.titleDelegate = self.titleDelegate
             }
         }
@@ -294,7 +305,6 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     
     func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
         if viewController is TimelineVC {
-            loadingScreen.isHidden = true
             self.dismiss(animated: false, completion: nil)
         }
     }

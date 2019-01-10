@@ -10,13 +10,7 @@ import UIKit
 import BSImagePicker
 import Photos
 
-protocol BackgroundModifierDelegate: class {
-    func removeContainerView()
-    func timelineName() -> String
-    func updateBackgroundImages(imageStatuses: [imageStatusTuple])
-}
-
-class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, ImageLayoutDelegate {
+class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
 
     @IBOutlet weak var addToEnd: UIButton!
     @IBOutlet weak var addAfter: UIButton!
@@ -25,23 +19,18 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var delete: UIButton!
     @IBOutlet weak var lblMessage: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var contentView: UIView!
+    @IBOutlet weak var doneButton: UIBarButtonItem!
     
-    weak var delegate: BackgroundModifierDelegate?
-    var layout: BackgroundModifierLayout!
-    var imageStatusesArray: [imageStatusTuple]!
-    var deletedPaths: [String]!
+    var fileSystemOperator: FileSystemOperator!
+    weak var delegate: BackgroundModifierDelegate!
     
-    @IBAction func item(_ sender: Any) {
-        collectionView.reloadData()
-        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
-    }
-    // Stores a dictionary whose elements are 1. the next int to to use for saving an image
-    // and 2. the image ordering array
-    var imageInfo: NSMutableDictionary!
-    var pListPath: NSString!
-    var imgDirectory: NSString!
-    // For order preservation purposes, the selectedIndices array stores which elements have
-    // selected and the order in which they were selected
+    //keep track of both my collection view and regular timeline height
+    var editorHeight: CGFloat!
+    var timelineHeight: CGFloat!
+    //selectedImages keeps track of which images were selected, selectedIndices keeps tracks of
+    //the order of the selected images
+    var selectedImages = [Bool]()
     var selectedIndices = [IndexPath]()
     var selectedCount: Int {
         set {
@@ -53,21 +42,16 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             return selectedIndices.count
         }
     }
-    
+    var updateIndex = 0
     var insertionIndex = 0
-    var shouldRefresh = true
+    var semaphore = 0   //hehe lame, but used for keeping track of color completions
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //initialize variables
-        imageStatusesArray = [imageStatusTuple]()
-        deletedPaths = [String]()
-        //activityIndicator.startAnimating()
-        if let layout = collectionView?.collectionViewLayout as? BackgroundModifierLayout {
-            self.layout = layout
-            self.layout.delegate = self
-        }
-        
+        //initialize layout
+        contentView.layer.borderColor = UIColor.lightGray.cgColor
+        contentView.layer.borderWidth = TEXT_FIELD_BORDER
+        contentView.layer.cornerRadius = TEXT_FIELD_RADIUS
         //set up collectionview
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -79,33 +63,17 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         
         //set up the background modifier buttons. Only the add to end button should be enabled at this point
         setEnabledButtons()
-        
-        //set up notifications so that if the user quits the app mid modification, changes will still be saved.
-        //let notificationCenter = NotificationCenter.default
-        //notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: Notification.Name.UIApplicationWillResignActive, object: nil)
-        
-        //this initializes the background in the actual timeline
-        delegate!.updateBackgroundImages(imageStatuses: imageStatusesArray)
-
-        
-
-
-        // Do any additional setup after loading the view.
-        
-        
-        
+        editorHeight = collectionView.frame.height
     }
     
-//    @objc func appMovedToBackground() {
-//        imageInfo.setValue(imageStatusesArray.map {$0.0}, forKeyPath: IMAGE_ORDERING_ARRAY)
-//        imageInfo.write(toFile: pListPath as String, atomically: false)
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        updateIndex = fileSystemOperator.imageInfoArray.count
+    }
     
 ////// IB ACTION METHODS
-    
     @IBAction func addToEndPressed(_ sender: Any) {
         let imagePicker = BSImagePickerViewController()
-        insertionIndex = imageStatusesArray.count
+        insertionIndex = fileSystemOperator.imageInfoArray.count
         addImagesToBackground(imagePicker: imagePicker)
     }
     
@@ -114,31 +82,29 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         //The user is only allowed to press addAfter when the selectedItems array has exactly one element
         insertionIndex = selectedIndices.first!.item + 1
         addImagesToBackground(imagePicker: imagePicker)
+        updateIndex = insertionIndex < updateIndex ? insertionIndex : updateIndex
     }
     
     @IBAction func moveToFrontPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .MOVE_FRONT)
-        reloadLayout(updateType: .MOVE_FRONT)
+        updateImageOrdering(updateType: .MOVE_FRONT)
+        reloadLayout()
     }
     
     @IBAction func moveToEndPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .MOVE_END)
-        reloadLayout(updateType: .MOVE_END)
+        updateImageOrdering(updateType: .MOVE_END)
+        reloadLayout()
     }
     
     @IBAction func deleteImagesPressed(_ sender: Any) {
-        updateImageStatusesArray(updateType: .DELETE)
-        reloadLayout(updateType: .DELETE)
+        updateImageOrdering(updateType: .DELETE)
+        reloadLayout()
     }
     
     @IBAction func donePressed(_ sender: Any) {
-        
-            self.delegate!.updateBackgroundImages(imageStatuses: self.imageStatusesArray)
-
-
+        delegate.backgroundModifierDonePressed(updateAt: updateIndex)
+        fileSystemOperator.saveMetadata()
     }
 
-    
     func setEnabledButtons() {
         if selectedCount == 0 {
             addToEnd.isEnabled = true
@@ -159,53 +125,41 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
         addAfter.isEnabled = false
     }
     
-    private func updateImageStatusesArray(updateType: UpdateAction) {
-        var tempImageData = [imageStatusTuple]()
+    private func updateImageOrdering(updateType: UpdateAction) {
+        var tempIndices = [ImageInfo]()
         //this has to be done very delicately...first add the objects at the new indices, THEN remove the old objects all at once
         for indexPath in selectedIndices {
-            tempImageData.append(imageStatusesArray[indexPath.item])
-            imageStatusesArray[indexPath.item].filePath = nil
+            tempIndices.append(fileSystemOperator.imageInfoArray[indexPath.item])
+            updateIndex = indexPath.item < updateIndex ? indexPath.item : updateIndex
+            //use to identify invalid indices
+            fileSystemOperator.imageInfoArray[indexPath.item].width = -1
         }
-        imageStatusesArray = imageStatusesArray.filter({
-            !($0.0 == nil)
-        })
-
+        fileSystemOperator.imageInfoArray = fileSystemOperator.imageInfoArray.filter { (info) -> Bool in
+            return info.width != -1
+        }
+        
         if updateType == .MOVE_FRONT {
-            imageStatusesArray.insert(contentsOf: tempImageData, at: 0)
+            fileSystemOperator.imageInfoArray.insert(contentsOf: tempIndices, at: 0)
+            updateIndex = 0
         } else if updateType == .MOVE_END {
-            imageStatusesArray.append(contentsOf: tempImageData)
+            fileSystemOperator.imageInfoArray.append(contentsOf: tempIndices)
         } else if updateType == .DELETE {
-            for image in tempImageData {
-                if let path = image.filePath {
-                    deletedPaths.append(path)
-                }
+            for info in tempIndices {
+                fileSystemOperator.deleteImage(path: info.name)
             }
         }
+        fileSystemOperator.saveMetadata()
     }
     
-    func getDeletedPaths() -> [String] {
-        return deletedPaths
-    }
-    
-    private func reloadLayout(updateType: UpdateAction) {
-        if updateType != UpdateAction.INSERT {
-            //insertion requires extra work and isn't handled here
-            let invalidationContext = BackgroundModifierInvalidationContext()
-            invalidationContext.updateType = updateType
-            invalidationContext.invalidateItems(at: selectedIndices)
-            layout.invalidateLayout(with: invalidationContext)
-        }
+    private func reloadLayout() {
         //reset all images to unselected
-        for i in 0 ..< imageStatusesArray.count {
-            imageStatusesArray[i].selectedStat = false
-        }
+        selectedImages = [Bool](repeating: false, count: fileSystemOperator.imageInfoArray.count)
         selectedIndices.removeAll()
         selectedCount = 0
         //reset the buttons. At this point, only the add to end button should be enabled
         setEnabledButtons()
         //now reload the collectionview
         collectionView.reloadData()
-        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 
 
@@ -216,15 +170,16 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imageStatusesArray.count
+        return fileSystemOperator.imageInfoArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? BackgroundModifierImageCell {
-            cell.imgView.image = FileSystemOperator.resizeImage(image: UIImage(data: imageStatusesArray[indexPath.item].data)!,
-                                                                height: collectionView.frame.height)
-            cell.didSelect = imageStatusesArray[indexPath.item].selectedStat
-            cell.layer.zPosition = 100
+            fileSystemOperator.retrieveImage(named: fileSystemOperator.imageInfoArray[indexPath.item].name, width: fileSystemOperator.imageInfoArray[indexPath.item].scaledWidth) { (image) in
+                cell.image = image
+            }
+            cell.didSelect = selectedImages[indexPath.item]
+//            cell.layer.zPosition = 100
             return cell
         }
         return UICollectionViewCell()
@@ -233,7 +188,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let cell = collectionView.cellForItem(at: indexPath) as? BackgroundModifierImageCell {
             cell.didSelect = !cell.didSelect
-            imageStatusesArray[indexPath.item].selectedStat = !imageStatusesArray[indexPath.item].selectedStat
+            selectedImages[indexPath.item] = !selectedImages[indexPath.item]
             if cell.didSelect {
                 selectedIndices.append(indexPath)
             } else {
@@ -241,10 +196,12 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             }
             if (selectedIndices.count == 0) {
                 lblMessage.text = "Hold and drag to reorder images"
+                lblMessage.textColor = UIColor.darkGray
             }
             setEnabledButtons()
         }
     }
+    
     
     @objc func handleLongGesture(_ gesture: UILongPressGestureRecognizer) {
         switch(gesture.state) {
@@ -259,52 +216,43 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
                 lblMessage.textColor = UIColor.red
             }
         case UIGestureRecognizer.State.changed:
-            if true {
-                collectionView.updateInteractiveMovementTargetPosition(gesture.location(in: gesture.view!))
-            }
+            collectionView.updateInteractiveMovementTargetPosition(gesture.location(in: gesture.view!))
         case UIGestureRecognizer.State.ended:
-            shouldRefresh = false
             collectionView.endInteractiveMovement()
-            collectionView.reloadData()
-            
         default:
             collectionView.cancelInteractiveMovement()
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveFromItemAt originalIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
-        let currentAttr = collectionView.layoutAttributesForItem(at: originalIndexPath)!
-        let destAttr = collectionView.layoutAttributesForItem(at: proposedIndexPath)!
         if originalIndexPath.item != proposedIndexPath.item {
-            if ((proposedIndexPath.item > originalIndexPath.item) && (currentAttr.frame.maxX > destAttr.frame.maxX)) {
-                return proposedIndexPath
-            } else if ((proposedIndexPath.item < originalIndexPath.item) && (currentAttr.frame.minX < destAttr.frame.minX)) {
-                return proposedIndexPath
-            } else {
-                return originalIndexPath
-            }
-        } else {
-            return originalIndexPath
+            let info = fileSystemOperator.imageInfoArray.remove(at: originalIndexPath.item)
+            fileSystemOperator.imageInfoArray.insert(info, at: proposedIndexPath.item)
+            return proposedIndexPath
         }
+        return originalIndexPath
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
+        return true
     }
     
     func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        if shouldRefresh {
-            let tuple = imageStatusesArray.remove(at: sourceIndexPath.item)
-            imageStatusesArray.insert(tuple, at: destinationIndexPath.item)
-        }
-    }
-
-
-/////IMAGE INFO DELEGATE METHODS
-    func getSizeAtIndexPath(indexPath: IndexPath) -> CGSize {
-        return imageStatusesArray[indexPath.item].largeSize
+       
     }
     
-    
-    func setShouldRefresh() {
-        shouldRefresh = true
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
     }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: fileSystemOperator.imageInfoArray[indexPath.item].scaledWidth , height: collectionView.frame.height)
+    }
+
     
 //IMAGE PICKER DELEGATE
     func addImagesToBackground(imagePicker: BSImagePickerViewController) {
@@ -314,35 +262,33 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             cancel: nil,
             finish: {[unowned self](assets) in
                 let photoManager = PHImageManager.default()
-                var indexPaths = [IndexPath]()
                 let options = PHImageRequestOptions()
                 options.isSynchronous = true
-                for (index, asset) in assets.enumerated() {
-                    autoreleasepool {
-                    let newWidth = (collectionHeight / CGFloat(asset.pixelHeight)) * CGFloat(asset.pixelWidth)
-                    photoManager.requestImage(for: asset, targetSize: CGSize(width: newWidth, height: collectionHeight), contentMode: PHImageContentMode.aspectFit, options: options, resultHandler: {[unowned self] (result, info) in
-                        let imageData = result!.jpegData(compressionQuality: 0.3)!
-                        self.imageStatusesArray.insert((filePath: nil, data: imageData, selectedStat: false, largeSize: result!.size), at: self.insertionIndex + index)
-                            indexPaths.append(IndexPath(item: self.insertionIndex + index, section: 0))
-                        })
+                let dispatch_group = DispatchGroup()
+                for _ in 0 ..< assets.count {
+                    dispatch_group.enter()
+                }
+                self.doneButton.isEnabled = false   //do not let the user leave during this delicate time
+                autoreleasepool {
+                    for (index, asset) in assets.enumerated() {
+                        photoManager.requestImage(for: asset, targetSize: CGSize(width: CGFloat(asset.pixelWidth), height: CGFloat(asset.pixelHeight)), contentMode: .aspectFit, options: options, resultHandler:
+                            {[unowned self] (result, info) in
+                                if let image = result {
+                                    self.fileSystemOperator.saveImage(image: image, index: self.insertionIndex + index, dispatch_group: dispatch_group)
+                                    self.selectedImages.append(false)
+                                }
+                            })
                     }
                 }
-                DispatchQueue.main.async {
-                    if assets.count > 0 {
-                    //the following code updates the layout if images were added to the background
-                        let invalidationContext = BackgroundModifierInvalidationContext()
-                        invalidationContext.updateType = .INSERT
-                        invalidationContext.insertionCount = indexPaths.count
-                        invalidationContext.invalidateItems(at: [IndexPath(item: self.insertionIndex, section: 0)])
-                        self.layout.invalidateLayout(with: invalidationContext)
-                        self.reloadLayout(updateType: .INSERT)
+                    DispatchQueue.main.async {
+                        self.reloadLayout()
                     }
-                }
-
+                    dispatch_group.notify(queue: DispatchQueue.main, work: DispatchWorkItem {
+                        //now all the colors have been loaded from this particular transaction
+                        self.reloadLayout()
+                        self.doneButton.isEnabled = true
+                        self.fileSystemOperator.saveMetadata()
+                    })
             }, completion: nil)
-    }
-    
-    override var prefersStatusBarHidden: Bool {
-        return true
     }
 }

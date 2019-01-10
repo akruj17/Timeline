@@ -8,77 +8,76 @@
 
 import UIKit
 
-var collectionHeight: CGFloat!
 class TimelineLayout: UICollectionViewLayout {
 
-    var eventCellWidth: CGFloat!
     var eventContentWidth: CGFloat = 0
     var imageContentWidth: CGFloat = 0
     var contentHeight: CGFloat {
         return collectionView!.frame.height
     }
-    
-    var eventCache = [UICollectionViewLayoutAttributes]()
+
     var imageCache = [UICollectionViewLayoutAttributes]()
-    
-    var delegate: ImageLayoutDelegate!
-    var eventDelegate: EventLayoutDelegate!
+    var eventCache = [UICollectionViewLayoutAttributes]()
+    var periodStickCache = [UICollectionViewLayoutAttributes]()
+    weak var delegate: TimelineCollectionDelegate!
     
     override func prepare() {
         //Setup for images
-        if imageCache.count != collectionView!.numberOfItems(inSection: 0) {
-            imageContentWidth = 0
-            var width: CGFloat = 0
-            for item in imageCache.count ..< collectionView!.numberOfItems(inSection: 0) {
-                let indexPath = IndexPath(item: item, section: 0)
-                var frame = CGRect()
-                
-                width = resizeImage(originalSize: delegate.getSizeAtIndexPath(indexPath: indexPath))
-                frame = CGRect(x: imageContentWidth, y: 0, width: width, height: contentHeight)
+        if imageCache.count != collectionView!.numberOfItems(inSection: IMAGE_SECTION) {
+            imageContentWidth = (imageCache.count > 0) ? imageCache.last!.frame.maxX : 0
+            for item in imageCache.count ..< collectionView!.numberOfItems(inSection: IMAGE_SECTION) {
+                let width = delegate.getWidthAtIndexPath(index: item)
+                let attributes = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: item, section: IMAGE_SECTION))
+                attributes.frame = CGRect(x: imageContentWidth, y: 0, width: width, height: contentHeight)
                 imageContentWidth += (width * 0.75)
-                
-                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-                attributes.frame = frame
                 imageCache.append(attributes)
             }
-            imageContentWidth += (0.25 * width)
+            imageContentWidth += (imageCache.count > 0) ? (0.25 * imageCache.last!.frame.width) : 0
         }
-        //Setup for events
-        if eventCache.count != collectionView!.numberOfItems(inSection: 1) {
-            collectionHeight = contentHeight
+        //Setup for events. eventXposCache and eventHeightCache should ALWAYS have same number of items
+        if eventCache.count != collectionView!.numberOfItems(inSection: EVENT_SECTION) {
             //This is actually the event cell width plus end padding
-            eventCellWidth = contentHeight * 0.8
+            let eventCellWidth = contentHeight * 0.8
+            let eventCellHeight = contentHeight * 0.3
+            let periodTopRowYOffset = 0.1 * contentHeight
             
-            var xOffset: [CGFloat] = [20, 20 + (eventCellWidth / 2)]
+            var xOffset: [CGFloat] = [TIMELINE_OFFSET, TIMELINE_OFFSET + (eventCellWidth / 2)]
+            //for events, and periods on the top row
+            let yOffset = [(contentHeight / 2) - (TIMELINE_LINE_HEIGHT / 2) - eventCellHeight, (contentHeight / 2) + (TIMELINE_LINE_HEIGHT / 2)]
             var row = 0
             
-            if !eventCache.isEmpty {
-                let startPoint = eventCache.last!.frame.minX + (eventCellWidth / 2)
+            if eventCache.isEmpty {
+                //starting from scratch. Layout is being initialized
+                eventContentWidth = 0
+            } else {
+                let numToRemove = eventCache.count - collectionView!.numberOfItems(inSection: EVENT_SECTION)
+                eventCache.removeLast((numToRemove > 0) ? numToRemove : 0)
+                periodStickCache.removeLast((numToRemove > 0) ? numToRemove : 0)
+                //end point for last cell
+                eventContentWidth = (eventCache.last == nil) ? TIMELINE_OFFSET : eventCache.last!.frame.minX + eventCellWidth
+                //end point for second to last cell, and where the first new cell will placed
+                let startPoint = (eventCache.count <= 1) ? xOffset[eventCache.count] : eventCache[eventCache.count - 2].frame.minX + eventCellWidth
                 if eventCache.count % 2 == 0 {
+                    //the next cell put down will be on the top row
                     xOffset = [startPoint, eventContentWidth]
                 } else {
-                    xOffset = [eventContentWidth , startPoint]
+                    xOffset = [eventContentWidth, startPoint]
                     row = 1
                 }
             }
-            for item in eventCache.count ..< collectionView!.numberOfItems(inSection: 1) {
-                let indexPath = IndexPath(item: item, section: 1)
             
-                var frame = CGRect()
-                var cellHeight: CGFloat = contentHeight * 0.3 // default for events
-                var yPos: CGFloat = (row % 2 == 0) ? ((contentHeight / 2) - (CGFloat(TIMELINE_LINE_HEIGHT / 2))) - cellHeight : (contentHeight / 2) + CGFloat(TIMELINE_LINE_HEIGHT / 2)
-                if eventDelegate.isTimeObjectPeriod(index: item) {
-                    cellHeight = (0.7 * contentHeight) + CGFloat(TIMELINE_LINE_HEIGHT / 2)
-                    if row == 1 {
-                        yPos = ((contentHeight / 2) - (0.4 * contentHeight))
-                    }
-                }
-                frame = CGRect(x: xOffset[row], y: yPos, width: (0.7 * eventCellWidth), height: cellHeight)
-                xOffset[row] = xOffset[row] + eventCellWidth
-                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-                attributes.frame = frame
-                eventCache.append(attributes)
-                
+            let numEvents = collectionView!.numberOfItems(inSection: EVENT_SECTION)
+            //add cells for the new events
+            for item in eventCache.count ..< numEvents {
+                //add attributes for the event
+                let eventAttributes = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: item, section: EVENT_SECTION))
+                eventAttributes.frame = CGRect(x: xOffset[row], y: yOffset[row % 2], width: 0.7 * eventCellWidth, height: eventCellHeight)
+                eventCache.append(eventAttributes)
+                //add attributes for the period stick
+                let stickAttributes = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: item, section: PERIOD_STICK_SECTION))
+                stickAttributes.frame = CGRect(x: xOffset[row], y: row % 2 == 1 ? periodTopRowYOffset : yOffset[1], width: 0.7 * eventCellWidth, height: 0.4 * contentHeight)
+                periodStickCache.append(stickAttributes)
+                xOffset[row] += eventCellWidth
                 row = (row + 1) > 1 ? 0: 1
             }
             eventContentWidth = max(xOffset[0], xOffset[1])
@@ -94,70 +93,35 @@ class TimelineLayout: UICollectionViewLayout {
         if eventCache.isEmpty || imageCache.isEmpty {
             self.prepare()
         }
-        
-        for attributes in eventCache {
-            if attributes.frame.intersects(rect) {
-                layoutAttributes.append(attributes)
-            }
-        }
-        for attributes in imageCache {
-            if attributes.frame.intersects(rect) {
-                layoutAttributes.append(attributes)
-            }
-        }
-        
-        return layoutAttributes
-    }
-    
-    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return eventCache[indexPath.row]
-    }
-    
-    
-    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
-        if let cont = context as? TimelineInvalidationContext {
-            if cont.invalidateEvents {
-                eventCache.removeLast(cont.numberOfEventsToDrop)
-                if let lastFrame = eventCache.last {
-                    eventContentWidth = lastFrame.frame.maxX + (0.3 * eventCellWidth)
-                } else {
-                    eventContentWidth = 0
+        //check each cache individually, but generalize the checking
+        let attributeCaches = [eventCache, periodStickCache, imageCache]
+        for cache in attributeCaches {
+            var foundEnd = false
+            for attributes in cache {
+                if attributes.frame.intersects(rect) {
+                    layoutAttributes.append(attributes)
+                    foundEnd = true
+                } else if foundEnd {
+                    break
                 }
             }
-            if cont.invalidateImages {
-                imageCache.removeAll()
-            }
-            
         }
+        return layoutAttributes
     }
-    
-    private func resizeImage(originalSize: CGSize) -> CGFloat {
-        let scale = contentHeight / originalSize.height
-        return scale * originalSize.width
-    }
-    
-    private func generateEventHeight(index: Int) -> CGFloat {
-        let minEventHeight = contentHeight * 0.30
-        let maxEventHeight = contentHeight * 0.45
-        if eventDelegate.isEventAtIndexFirstOfYear(index: index) { 
-            return 0.35 * contentHeight
-        } else if index >= 0 && index < 4 {
-            return CGFloat(arc4random_uniform(UInt32(maxEventHeight - minEventHeight)) + UInt32(minEventHeight))
+
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        if indexPath.section == IMAGE_SECTION {
+            return imageCache[indexPath.item]
+        } else if indexPath.section == PERIOD_STICK_SECTION {
+            return periodStickCache[indexPath.item]
         } else {
-            let prevHeight = eventCache[index - 2].frame.height
-            let prevPrevHeight = eventCache[index - 4].frame.height
-            if prevHeight < prevPrevHeight {  // this cell should have a greater height to keep the pattern
-                return CGFloat(arc4random_uniform(UInt32(maxEventHeight - prevHeight)) + UInt32(prevHeight))
-            } else { // this cell should have a lower height to keep the pattern
-                return CGFloat(arc4random_uniform(UInt32(prevHeight - minEventHeight)) + UInt32(minEventHeight))
-            }
+            return eventCache[indexPath.item]
         }
-        
     }
-
+    
+    func invalidateImageLayout(startingAt index: Int) {
+        imageCache.removeLast(imageCache.count - index)
+    }
 }
 
-protocol EventLayoutDelegate: class {
-    func isEventAtIndexFirstOfYear(index: Int) -> Bool
-    func isTimeObjectPeriod(index: Int) -> Bool
-}
+

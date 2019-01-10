@@ -36,7 +36,7 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
     private var secondLastYear: Int? = nil
     var layoutIndex: Int = -1
     //FOR SAVING UPDATED DATA
-    var delegate : EditorDataSaveDelegate!
+    weak var delegate : EditorDataSaveDelegate!
     //COMPLETION HANDLER
     var completion : ((String, String, UIView) -> ())!
     
@@ -70,8 +70,9 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
         contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
-    func configure(index: Int, timeObject: TimeObject, first: Int, last: Int, second: Int?, secondLast: Int?) {
+    func configure(index: Int, timeObject: TimeObject, color: UIColor, first: Int, last: Int, second: Int?, secondLast: Int?) {
         eventOverviewField.text = timeObject.event.overview
+        self.tintColor = color
         if timeObject.event.detailed.replacingOccurrences(of: " ", with: "") == "" {
             detailedTextView.text = EVENT_DETAILED_PLACEHOLDER
             detailedTextView.textColor = UIColor.lightGray
@@ -189,7 +190,7 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         if  let text = textField.text {
             if textField == yearField {
-                delegate.saveEndYear(year: Int(text), index: layoutIndex)
+                delegate.saveYear(year: Int(text), index: layoutIndex)
                 year = Int(text)!
             } else {
                 //field is overview field

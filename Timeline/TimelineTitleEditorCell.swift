@@ -11,7 +11,7 @@ import UIKit
 class TimelineTitleEditorCell: UITableViewCell, UITextFieldDelegate {
 
     @IBOutlet weak var titleLbl: UITextField!
-    var delegate : EditorDataSaveDelegate!
+    weak var delegate : EditorDataSaveDelegate!
     
     override func awakeFromNib() {
         super.awakeFromNib()

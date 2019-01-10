@@ -9,7 +9,7 @@
 import Foundation
 import RealmSwift
 
-class Event: Object, NSCopying, TimeObject{
+class Event: Object, TimeObject{
     @objc dynamic var overview = ""
     @objc dynamic var detailed = ""
     let startYear = RealmOptional<Int>()
@@ -28,19 +28,6 @@ class Event: Object, NSCopying, TimeObject{
     override static func primaryKey() -> String? {
         return "id"
     }
-
-    func copy(with zone: NSZone? = nil) -> Any {
-        let copy = Event()
-        copy.overview = self.overview
-        copy.detailed = self.detailed
-        copy.startYear.value = self.startYear.value
-        copy.endYear.value = self.endYear.value
-        copy.isTimePeriod = self.isTimePeriod
-        copy.timeline = self.timeline.copy() as? Timeline
-        copy.id = self.id
-        
-        return copy
-    }
     
     var year: Int {
         get {
@@ -51,32 +38,17 @@ class Event: Object, NSCopying, TimeObject{
     var event: Event {
         get {
             return self
-        } set {
-        }
+        } set {}
     }
 }
 
-class Timeline: Object, NSCopying {
+class Timeline: Object {
     @objc dynamic var name = ""
     @objc dynamic var createdAt = Date()
     @objc dynamic var id = ""
-    @objc dynamic var editsRequired = false
     
     override static func primaryKey() -> String? {
         return "id"
-    }
-    
-    override static func ignoredProperties() -> [String] {
-        return ["editsRequired"]
-    }
-    
-    func copy(with zone: NSZone? = nil) -> Any {
-        let copy = Timeline()
-        copy.name = self.name
-        copy.createdAt = self.createdAt
-        copy.id = self.id
-
-        return copy
     }
 }
 

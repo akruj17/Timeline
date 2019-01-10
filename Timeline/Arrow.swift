@@ -15,6 +15,7 @@ class Arrow: UIView {
     let head2 = UIView()
     
     var _pointsRight = false
+    var _isTop = true
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,7 +39,6 @@ class Arrow: UIView {
         self.addSubview(tail)
         self.addSubview(head1)
         self.addSubview(head2)
-        self.backgroundColor = UIColor.clear
     }
     
     override var tintColor: UIColor? {
@@ -57,8 +57,16 @@ class Arrow: UIView {
             return _pointsRight
         } set (v) {
             _pointsRight = v
-            self.transform = CGAffineTransform(rotationAngle: (_pointsRight ? 0 : .pi))
+            self.transform = CGAffineTransform(scaleX: _pointsRight ? 1 : -1, y: _isTop ? 1 : -1)
         }
     }
-
+    
+    var isTop: Bool {
+        get {
+            return _isTop
+        } set (v) {
+            _isTop = v
+            self.transform = CGAffineTransform(scaleX: _pointsRight ? 1 : -1, y: _isTop ? 1 : -1)
+        }
+    }
 }

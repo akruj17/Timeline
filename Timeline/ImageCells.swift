@@ -39,9 +39,11 @@ class BackgroundModifierImageCell: UICollectionViewCell {
     
     @IBOutlet weak var imgView: UIImageView!
     @IBOutlet weak var checkmark: UIImageView!
+    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     var alphaLayer =  CALayer()
     var _didSelect = false
     
+    //////GET-SET VARIABLES
     var didSelect: Bool {
         set {
             if newValue {
@@ -55,6 +57,23 @@ class BackgroundModifierImageCell: UICollectionViewCell {
             _didSelect = newValue
         } get {
             return _didSelect
+        }
+    }
+    
+    var image : UIImage? {
+        get {
+            return imgView.image
+        } set (v) {
+            imgView.image = v
+            if v == nil {
+                loadingIndicator.isHidden = false
+                loadingIndicator.startAnimating()
+                imgView.isHidden = true
+            } else {
+                loadingIndicator.stopAnimating()
+                loadingIndicator.isHidden = true
+                imgView.isHidden = false
+            }
         }
     }
     

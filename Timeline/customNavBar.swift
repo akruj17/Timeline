@@ -14,37 +14,26 @@ class customNavBar: UINavigationBar {
     var customHeight : CGFloat = 60
         
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-            
         return CGSize(width: UIScreen.main.bounds.width, height: customHeight)
             
     }
         
     override func layoutSubviews() {
         super.layoutSubviews()
-            
+        customHeight = (UIScreen.main.traitCollection.verticalSizeClass == .regular) ? 60 : 32
         frame = CGRect(x: frame.origin.x, y:  0, width: frame.size.width, height: customHeight)
             
         // title position (statusbar height / 2)
         setTitleVerticalPositionAdjustment(0, for: UIBarMetrics.default)
-            
         for subview in self.subviews {
-            var stringFromClass = NSStringFromClass(subview.classForCoder)
+            let stringFromClass = NSStringFromClass(subview.classForCoder)
             if stringFromClass.contains("BarBackground") {
                 subview.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: customHeight)
-             //   subview.backgroundColor = .yellow
+            } else {
+                //center the buttons vertically
+                subview.frame = CGRect(x: subview.frame.origin.x, y: (self.frame.height - subview.frame.height) / 2.0, width: subview.frame.width, height: subview.frame.height)
+                self.titleTextAttributes = [.font: UIFont(name: "AvenirNext-Regular", size: ((UIScreen.main.traitCollection.verticalSizeClass == .regular) ? 30 : 20))!, .foregroundColor: UIColor.darkGray]
             }
-        
-            stringFromClass = NSStringFromClass(subview.classForCoder)
-            if stringFromClass.contains("BarContent") {
-                if stringFromClass.contains("Title") {
-                } else {
-                    subview.frame = CGRect(x: subview.frame.origin.x, y: 20, width: subview.frame.width, height: customHeight - 20)
-                }
-                
-                
-               // subview.backgroundColor = UIColor(red: 20/255, green: 20/255, blue: 20/255, alpha: 0.4)
-                
-                }
-            }
-}
+        }
+    }
 }

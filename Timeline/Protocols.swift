@@ -20,10 +20,20 @@ protocol EditorDataSaveDelegate: class {
 
 // communication protocol for (TimelineEditorVC && TimelineVC) -> TitleScreenVC
 protocol CollectionReloadDelegate: class {
-    func updateCollection(updateType: UpdateAction, completion: ((Bool) -> ())?)
+    func updateCollection(completion: ((Bool) -> ())?)
 }
 
 // communication protocol for TitleScrnLayout -> TitleScreenVC
 protocol TitleCollectionDelegate: class {
     func updateCollectionWidth(newWidth: CGFloat)
+}
+
+// communication protocol for TimelineLayout -> TimelineVC
+protocol TimelineCollectionDelegate: class {
+    func getWidthAtIndexPath(index: Int) -> CGFloat
+}
+
+// communication protocol for BackgroundModifierVC -> TimelineVC
+protocol BackgroundModifierDelegate: class {
+    func backgroundModifierDonePressed(updateAt updateIndex: Int)
 }

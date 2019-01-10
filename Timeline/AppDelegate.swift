@@ -18,21 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        application.isStatusBarHidden = true
         // Override point for customization after application launch.
-        let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
-        if !launchedBefore {
-            UserDefaults.standard.set(true, forKey: "launchedBefore")
-            let fileManager = FileManager.default
-            let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-            let direc = documents.appendingPathComponent(TIMELINE_IMAGE_DIRECTORY) as NSString
-            // Do any additional setup after loading the view, typically from a nib.
-            if !fileManager.fileExists(atPath: direc as String) {
-                try! fileManager.createDirectory(atPath: direc as String, withIntermediateDirectories: true, attributes: nil)
-                let firstImagesPath = direc.appendingPathComponent("/\(FIRST_IMAGES_DIRECTORY)")
-                try! fileManager.createDirectory(atPath: firstImagesPath, withIntermediateDirectories: false, attributes: nil)
-            }
-        }
         return true
     }
 

@@ -22,7 +22,7 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     }
     
     var eventIndex: Int!
-    var delegate : EditorDataSaveDelegate!
+    weak var delegate : EditorDataSaveDelegate!
     let eventOverviewPlaceholder = "Enter a brief description of the event which will show up on the timeline. 70 chars max"
     let eventDetailedPlaceholder = "Enter a more detailed description of the event (Optional)"
     

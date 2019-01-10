@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A8009C041F2BF77100DD32C3 /* BackgroundModifierLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C031F2BF77100DD32C3 /* BackgroundModifierLayout.swift */; };
 		A8009C061F2BF94300DD32C3 /* ImageCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C051F2BF94300DD32C3 /* ImageCells.swift */; };
 		A8009C081F2FF6BC00DD32C3 /* constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8009C071F2FF6BC00DD32C3 /* constants.swift */; };
-		A813AA0D200C5C2A00661477 /* PeriodCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A813AA0C200C5C2A00661477 /* PeriodCell.swift */; };
+		A813AA0D200C5C2A00661477 /* PeriodStickCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A813AA0C200C5C2A00661477 /* PeriodStickCell.swift */; };
 		A8153E871F02A97800A7B02D /* TitleScrnLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E861F02A97800A7B02D /* TitleScrnLayout.swift */; };
 		A8153E8B1F02BB3D00A7B02D /* TimelineEventBoxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */; };
 		A8153E941F0954F700A7B02D /* TimelineEditorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8153E931F0954F700A7B02D /* TimelineEditorVC.swift */; };
@@ -28,11 +27,8 @@
 		A826E8E61F140D770050B625 /* TimelineLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A826E8E51F140D770050B625 /* TimelineLayout.swift */; };
 		A82D89561F095AFD00F769D7 /* EventEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89551F095AFD00F769D7 /* EventEditorCell.swift */; };
 		A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */; };
-		A857D218200BBFB700B258DF /* TableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A857D217200BBFB700B258DF /* TableViewHeader.swift */; };
-		A8641F321FC3DC8F00058F6F /* CacheArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F311FC3DC8F00058F6F /* CacheArray.swift */; };
 		A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F511FCA711B00058F6F /* customNavBar.swift */; };
 		A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86790F01F7C65F700F025F4 /* RealmOperator.swift */; };
-		A875E9681F89439700AD70EA /* EventDetailedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A875E9671F89439700AD70EA /* EventDetailedVC.swift */; };
 		A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102591FD32D39004045EB /* TitleScreenCell.swift */; };
 		A8896D3B1F197D4500D62C0F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8896D3A1F197D4500D62C0F /* Event.swift */; };
 		A88F78B220106164006F1EE1 /* Arrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88F78B120106164006F1EE1 /* Arrow.swift */; };
@@ -42,20 +38,18 @@
 		A8E8A7C921DD301F00378441 /* EventBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E8A7C821DD301F00378441 /* EventBox.swift */; };
 		A8E8A7CB21DD4B0800378441 /* TitleBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E8A7CA21DD4B0800378441 /* TitleBox.swift */; };
 		A8E8A7CD21DD4B1900378441 /* TitleBox.xib in Resources */ = {isa = PBXBuildFile; fileRef = A8E8A7CC21DD4B1900378441 /* TitleBox.xib */; };
-		A8E8A7D121DD8FBB00378441 /* PeriodBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E8A7D021DD8FBB00378441 /* PeriodBox.swift */; };
+		A8EB962121E56B2600579C7E /* PeriodStick.xib in Resources */ = {isa = PBXBuildFile; fileRef = A8EB962021E56B2500579C7E /* PeriodStick.xib */; };
+		A8EB962321E56BC200579C7E /* PeriodStick.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EB962221E56BC200579C7E /* PeriodStick.swift */; };
 		A8F615B01F26AFAD0093254A /* BackgroundModifierVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */; };
-		A8FA51F321DEA24300154F14 /* PeriodTestBox.xib in Resources */ = {isa = PBXBuildFile; fileRef = A8FA51F221DEA24300154F14 /* PeriodTestBox.xib */; };
-		A8FD345F1F480155009254D6 /* InvalidationContexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FD345E1F480155009254D6 /* InvalidationContexts.swift */; };
 		BE54055BB571D77079C3F4E9 /* Pods_Timeline.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB5DA7FF69642D06BDAFF15 /* Pods_Timeline.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1BAB4CCF50200FB65ABE1659 /* Pods-Timeline.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Timeline.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Timeline/Pods-Timeline.debug.xcconfig"; sourceTree = "<group>"; };
 		53734F8FE5D7C4FB2AF8CC49 /* Pods-Timeline.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Timeline.release.xcconfig"; path = "Pods/Target Support Files/Pods-Timeline/Pods-Timeline.release.xcconfig"; sourceTree = "<group>"; };
-		A8009C031F2BF77100DD32C3 /* BackgroundModifierLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundModifierLayout.swift; sourceTree = "<group>"; };
 		A8009C051F2BF94300DD32C3 /* ImageCells.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCells.swift; sourceTree = "<group>"; };
 		A8009C071F2FF6BC00DD32C3 /* constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = constants.swift; sourceTree = "<group>"; };
-		A813AA0C200C5C2A00661477 /* PeriodCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodCell.swift; sourceTree = "<group>"; };
+		A813AA0C200C5C2A00661477 /* PeriodStickCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodStickCell.swift; sourceTree = "<group>"; };
 		A8153E861F02A97800A7B02D /* TitleScrnLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleScrnLayout.swift; sourceTree = "<group>"; };
 		A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineEventBoxCell.swift; sourceTree = "<group>"; };
 		A8153E931F0954F700A7B02D /* TimelineEditorVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineEditorVC.swift; sourceTree = "<group>"; };
@@ -75,11 +69,8 @@
 		A826E8E51F140D770050B625 /* TimelineLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineLayout.swift; sourceTree = "<group>"; };
 		A82D89551F095AFD00F769D7 /* EventEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventEditorCell.swift; sourceTree = "<group>"; };
 		A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineTitleEditorCell.swift; sourceTree = "<group>"; };
-		A857D217200BBFB700B258DF /* TableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewHeader.swift; sourceTree = "<group>"; };
-		A8641F311FC3DC8F00058F6F /* CacheArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheArray.swift; sourceTree = "<group>"; };
 		A8641F511FCA711B00058F6F /* customNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customNavBar.swift; sourceTree = "<group>"; };
 		A86790F01F7C65F700F025F4 /* RealmOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmOperator.swift; sourceTree = "<group>"; };
-		A875E9671F89439700AD70EA /* EventDetailedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailedVC.swift; sourceTree = "<group>"; };
 		A88102591FD32D39004045EB /* TitleScreenCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenCell.swift; sourceTree = "<group>"; };
 		A8896D3A1F197D4500D62C0F /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		A88F78B120106164006F1EE1 /* Arrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arrow.swift; sourceTree = "<group>"; };
@@ -89,10 +80,9 @@
 		A8E8A7C821DD301F00378441 /* EventBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBox.swift; sourceTree = "<group>"; };
 		A8E8A7CA21DD4B0800378441 /* TitleBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBox.swift; sourceTree = "<group>"; };
 		A8E8A7CC21DD4B1900378441 /* TitleBox.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TitleBox.xib; sourceTree = "<group>"; };
-		A8E8A7D021DD8FBB00378441 /* PeriodBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodBox.swift; sourceTree = "<group>"; };
+		A8EB962021E56B2500579C7E /* PeriodStick.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PeriodStick.xib; sourceTree = "<group>"; };
+		A8EB962221E56BC200579C7E /* PeriodStick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodStick.swift; sourceTree = "<group>"; };
 		A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundModifierVC.swift; sourceTree = "<group>"; };
-		A8FA51F221DEA24300154F14 /* PeriodTestBox.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PeriodTestBox.xib; sourceTree = "<group>"; };
-		A8FD345E1F480155009254D6 /* InvalidationContexts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InvalidationContexts.swift; sourceTree = "<group>"; };
 		EBB5DA7FF69642D06BDAFF15 /* Pods_Timeline.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Timeline.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -130,7 +120,6 @@
 			children = (
 				A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */,
 				A82D89551F095AFD00F769D7 /* EventEditorCell.swift */,
-				A857D217200BBFB700B258DF /* TableViewHeader.swift */,
 			);
 			name = "TableView Cells";
 			sourceTree = "<group>";
@@ -141,7 +130,7 @@
 				A8153E8A1F02BB3D00A7B02D /* TimelineEventBoxCell.swift */,
 				A8009C051F2BF94300DD32C3 /* ImageCells.swift */,
 				A88102591FD32D39004045EB /* TitleScreenCell.swift */,
-				A813AA0C200C5C2A00661477 /* PeriodCell.swift */,
+				A813AA0C200C5C2A00661477 /* PeriodStickCell.swift */,
 			);
 			name = "CollectionView Cells";
 			sourceTree = "<group>";
@@ -172,7 +161,6 @@
 				A8153E931F0954F700A7B02D /* TimelineEditorVC.swift */,
 				A826E8E31F13FEEA0050B625 /* TimelineVC.swift */,
 				A8F615AF1F26AFAD0093254A /* BackgroundModifierVC.swift */,
-				A875E9671F89439700AD70EA /* EventDetailedVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -182,8 +170,6 @@
 			children = (
 				A8153E861F02A97800A7B02D /* TitleScrnLayout.swift */,
 				A826E8E51F140D770050B625 /* TimelineLayout.swift */,
-				A8009C031F2BF77100DD32C3 /* BackgroundModifierLayout.swift */,
-				A8FD345E1F480155009254D6 /* InvalidationContexts.swift */,
 			);
 			name = Layout;
 			sourceTree = "<group>";
@@ -194,7 +180,6 @@
 				A8896D3A1F197D4500D62C0F /* Event.swift */,
 				A86790F01F7C65F700F025F4 /* RealmOperator.swift */,
 				A8D451F11F7E16320062FE9D /* FileSystemOperator.swift */,
-				A8641F311FC3DC8F00058F6F /* CacheArray.swift */,
 				A8231BFE21D6D9A900663459 /* DataValidator.swift */,
 			);
 			name = Model;
@@ -244,9 +229,9 @@
 				A8E8A7C821DD301F00378441 /* EventBox.swift */,
 				A8E8A7CC21DD4B1900378441 /* TitleBox.xib */,
 				A8E8A7CA21DD4B0800378441 /* TitleBox.swift */,
-				A8FA51F221DEA24300154F14 /* PeriodTestBox.xib */,
-				A8E8A7D021DD8FBB00378441 /* PeriodBox.swift */,
 				A88F78B120106164006F1EE1 /* Arrow.swift */,
+				A8EB962021E56B2500579C7E /* PeriodStick.xib */,
+				A8EB962221E56BC200579C7E /* PeriodStick.swift */,
 			);
 			name = CellBoxes;
 			sourceTree = "<group>";
@@ -326,9 +311,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A8231C0321D7FA6600663459 /* LoadingScreen.xib in Resources */,
+				A8EB962121E56B2600579C7E /* PeriodStick.xib in Resources */,
 				A81845691EF387C500F7BEFB /* LaunchScreen.storyboard in Resources */,
 				A8E8A7C721DD299B00378441 /* EventBox.xib in Resources */,
-				A8FA51F321DEA24300154F14 /* PeriodTestBox.xib in Resources */,
 				A8E8A7CD21DD4B1900378441 /* TitleBox.xib in Resources */,
 				A81845661EF387C500F7BEFB /* Assets.xcassets in Resources */,
 				A81845611EF387C500F7BEFB /* Main.storyboard in Resources */,
@@ -400,31 +385,26 @@
 				A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */,
 				A82D89561F095AFD00F769D7 /* EventEditorCell.swift in Sources */,
 				A8F615B01F26AFAD0093254A /* BackgroundModifierVC.swift in Sources */,
-				A8FD345F1F480155009254D6 /* InvalidationContexts.swift in Sources */,
 				A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */,
-				A8009C041F2BF77100DD32C3 /* BackgroundModifierLayout.swift in Sources */,
 				A818455E1EF387C500F7BEFB /* TitleScreenVC.swift in Sources */,
 				A826E8E41F13FEEA0050B625 /* TimelineVC.swift in Sources */,
-				A857D218200BBFB700B258DF /* TableViewHeader.swift in Sources */,
 				A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */,
 				A8D451F21F7E16320062FE9D /* FileSystemOperator.swift in Sources */,
 				A8009C081F2FF6BC00DD32C3 /* constants.swift in Sources */,
 				A8E8A7CB21DD4B0800378441 /* TitleBox.swift in Sources */,
 				A88F78B220106164006F1EE1 /* Arrow.swift in Sources */,
 				A8153E8B1F02BB3D00A7B02D /* TimelineEventBoxCell.swift in Sources */,
-				A875E9681F89439700AD70EA /* EventDetailedVC.swift in Sources */,
 				A8E8A7C921DD301F00378441 /* EventBox.swift in Sources */,
 				A8231C0121D7F8B400663459 /* LoadingScreen.swift in Sources */,
-				A8E8A7D121DD8FBB00378441 /* PeriodBox.swift in Sources */,
 				A8231BFF21D6D9A900663459 /* DataValidator.swift in Sources */,
-				A813AA0D200C5C2A00661477 /* PeriodCell.swift in Sources */,
+				A813AA0D200C5C2A00661477 /* PeriodStickCell.swift in Sources */,
 				A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */,
 				A818455C1EF387C500F7BEFB /* AppDelegate.swift in Sources */,
 				A8C26BE621CC7A12001933A2 /* Protocols.swift in Sources */,
 				A8009C061F2BF94300DD32C3 /* ImageCells.swift in Sources */,
+				A8EB962321E56BC200579C7E /* PeriodStick.swift in Sources */,
 				A8896D3B1F197D4500D62C0F /* Event.swift in Sources */,
 				A8231C0721D9725400663459 /* EventDetailedView.swift in Sources */,
-				A8641F321FC3DC8F00058F6F /* CacheArray.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,7 +558,7 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -598,7 +578,7 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

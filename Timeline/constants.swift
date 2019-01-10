@@ -9,12 +9,17 @@
 import UIKit
 
 let TIMELINE_IMAGE_DIRECTORY = "TimelineImages"
-let FIRST_IMAGES_DIRECTORY = "FirstImages"
 let IMAGE_INFO_PLIST = "imageInfo.plist"
-let IMAGE_COUNTER = "imageCounter"
-let IMAGE_ORDERING_ARRAY = "imageOrderingArray"
+let IMAGE_COUNTER = "image_counter"
+let NAME = "name"
+let WIDTH = "width"
+let SCALED_WIDTH = "scaledWidth"
+let COLOR = "color"
+let IMAGE_INFO_ARRAY = "image_info_array"
 
 let TITLE_TIMELINE_PADDING: CGFloat = 120
+let TITLE_TIMELINE_PADDING_COMPACT: CGFloat = 30
+let TIMELINE_OFFSET: CGFloat = 20
 
 let PERIOD_CELL_BORDER: CGFloat = 8
 let TEXT_FIELD_BORDER: CGFloat = 2
@@ -38,6 +43,13 @@ let NEW = 0 //a new timeline is being created
 let INVALID = 1 //the user must fix something because the state is invalid
 let MODIFY = 2 //the user is modifying fields from the timeline screen
 
+//Timeline sections
+let IMAGE_SECTION = 0
+let PERIOD_STICK_SECTION = 1
+let EVENT_SECTION = 2
+
+let ORIGINAL_WIDTH: CGFloat = -1
+
 let editorViewRed = UIColor(red: 236/255, green: 105/255, blue: 83/255, alpha: 1)
 
 enum UpdateAction {
@@ -53,6 +65,19 @@ enum EventInfo {
     case TIME_PERIOD
     case START_YEAR
     case END_YEAR
+    case DEFAULT
 }
 
-typealias imageStatusTuple = (filePath: String?, data: Data, selectedStat: Bool, largeSize: CGSize)
+class ImageInfo {
+    var name: String
+    var width: CGFloat
+    var scaledWidth: CGFloat
+    var color: UIColor
+    
+    init(name: String, width: CGFloat, scaledWidth: CGFloat, color: UIColor) {
+        self.name = name
+        self.width = width
+        self.scaledWidth = scaledWidth
+        self.color = color
+    }
+}
