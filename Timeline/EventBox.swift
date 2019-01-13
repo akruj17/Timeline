@@ -30,6 +30,7 @@ class EventBox: UIView {
     //DATA VARIABLES
     var top = false
     var yearValue: Int? = nil
+    var _eventType: EventType = .REGULAR
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -52,8 +53,9 @@ class EventBox: UIView {
         contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
-    func configure(isTop: Bool, year: Int?, overview: String, color: UIColor) {
+    func configure(isTop: Bool, year: Int?, overview: String, color: UIColor, eventType: EventType) {
         self.isTop = isTop
+        self._eventType = eventType
         self.year = year
         self.overviewField.text = overview
         self.tintColor = color
@@ -77,14 +79,18 @@ class EventBox: UIView {
             yearValue = v
             if v == nil {
                 //this is not the first event of the year
-                yearContainer.isHidden = true
-                stick.isHidden = false
+                yearContainer.isHidden = _eventType == .REGULAR
+                stick.isHidden = _eventType != .REGULAR
+                if _eventType != .REGULAR {
+                    yearField.text = _eventType == .BEGIN ? "BEGAN" : "ENDED"
+                }
             } else {
                 //this is the first event of the year, show the year
                 yearField.text = "\(v!)"
-                if yearContainer.isHidden {
-                    yearContainer.isHidden = false
+                if _eventType != .REGULAR {
+                    yearField.text! += (_eventType == .BEGIN) ? "- BEGAN" : "- ENDED"
                 }
+                yearContainer.isHidden = false
                 stick.isHidden = true
             }
         }

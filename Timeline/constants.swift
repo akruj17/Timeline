@@ -48,7 +48,12 @@ let IMAGE_SECTION = 0
 let PERIOD_STICK_SECTION = 1
 let EVENT_SECTION = 2
 
-let ORIGINAL_WIDTH: CGFloat = -1
+//used for event years on cells
+enum EventType {
+    case REGULAR
+    case BEGIN  //for period
+    case END    //for period
+}
 
 let editorViewRed = UIColor(red: 236/255, green: 105/255, blue: 83/255, alpha: 1)
 
@@ -68,16 +73,23 @@ enum EventInfo {
     case DEFAULT
 }
 
+enum WidthType {
+    case ORIGINAL
+    case SCALED
+}
+
 class ImageInfo {
     var name: String
     var width: CGFloat
     var scaledWidth: CGFloat
     var color: UIColor
+    weak var cell: UICollectionViewCell?
     
     init(name: String, width: CGFloat, scaledWidth: CGFloat, color: UIColor) {
         self.name = name
         self.width = width
         self.scaledWidth = scaledWidth
         self.color = color
+        self.cell = nil
     }
 }

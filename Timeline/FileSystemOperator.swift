@@ -48,29 +48,33 @@ class FileSystemOperator {
             }
         }
     }
-    
-    func saveImage(image: UIImage, index: Int, dispatch_group: DispatchGroup) {
-            let imagePath = "/image\(self.imageCounter).jpg"
-            self.imageCounter += 1
-            let imageFile = self.imageDirectory.appendingPathComponent(imagePath)
-            // scale the image before saving it
-            let scale = timelineCollectionHeight / image.size.height
-            UIGraphicsBeginImageContext(CGSize(width: image.size.width * scale, height: image.size.height * scale))
-            image.draw(in: CGRect(x: 0, y: 0, width: image.size.width * scale, height: image.size.height * scale))
-            let newImage = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            let scaledWidth = (self.backgroundCollectionHeight / CGFloat(image.size.height)) * CGFloat(image.size.width)
-            let info = ImageInfo.init(name: imagePath, width: newImage!.size.width, scaledWidth: scaledWidth, color: UIColor.darkGray)
-            self.imageInfoArray.insert(info, at: index)
-            DispatchQueue.global(qos: .background).async {
-            // now save the newImage
-            self.fileManager.createFile(atPath: imageFile, contents: newImage!.jpegData(compressionQuality: 0.4), attributes: nil)
-            Palette.generateWith(configuration: PaletteConfiguration(image: image), queue: DispatchQueue.main) { (palette) in
-                    let color = palette.vibrantColor(defaultColor: UIColor.darkGray)
-                    info.color = color
-                    dispatch_group.leave()
-            }
 
+    func prepareForImage(size: CGSize, index: Int) -> ImageInfo {
+        let imagePath = "/image\(self.imageCounter).jpg"
+        imageCounter += 1
+        let aspectRatio = size.width / size.height
+        let info = ImageInfo.init(name: imagePath, width: timelineCollectionHeight * aspectRatio, scaledWidth: backgroundCollectionHeight * aspectRatio, color: UIColor.darkGray)
+        self.imageInfoArray.insert(info, at: index)
+        return info
+    }
+    
+    func saveImage(image: UIImage, info: ImageInfo) {
+        DispatchQueue.global(qos: .background).async {
+            let imageFile = self.imageDirectory.appendingPathComponent(info.name)
+            // scale the image before saving it
+            let newImage = image.resize(targetSize: CGSize(width: info.width, height: self.timelineCollectionHeight))
+            self.fileManager.createFile(atPath: imageFile, contents: newImage.jpegData(compressionQuality: 0.5), attributes: nil)
+            Palette.generateWith(configuration: PaletteConfiguration(image: image), queue: DispatchQueue.global(qos: .background)) { (palette) in
+                let color = palette.vibrantColor(defaultColor: UIColor.darkGray)
+                info.color = color
+            }
+            DispatchQueue.main.async {
+                if let cell = info.cell as? BackgroundModifierImageCell {
+                    cell.image = image.resize(targetSize: CGSize(width: info.scaledWidth, height: self.backgroundCollectionHeight))
+                }  else if let cell = info.cell as? TimelineImageCell {
+                    cell.imgView.image = newImage
+                }
+            }
         }
     }
     
@@ -85,22 +89,29 @@ class FileSystemOperator {
         }
     }
     
-    func retrieveImage(named: String, width: CGFloat, completion: @escaping (UIImage?) -> ()) {
+    func retrieveImage(index: Int, widthType: WidthType) {
         DispatchQueue.global(qos: .background).async {
-            var _image = UIImage(contentsOfFile: self.imageDirectory.appendingPathComponent("\(named)"))
+            let info = self.imageInfoArray[index]
+            var _image = UIImage(contentsOfFile: self.imageDirectory.appendingPathComponent("\(info.name)"))
             if let image = _image {
-                if width != ORIGINAL_WIDTH {
-                    let scale = width / image.size.width
-                    UIGraphicsBeginImageContext(CGSize(width: image.size.width * scale, height: image.size.height * scale))
-                    image.draw(in: CGRect(x: 0, y: 0, width: image.size.width * scale, height: image.size.height * scale))
-                    let newImage = UIGraphicsGetImageFromCurrentImageContext()
-                    _image = newImage!
-                    UIGraphicsEndImageContext()
+                if widthType == .SCALED {
+                    _image = image.resize(targetSize: CGSize(width: info.scaledWidth, height: self.backgroundCollectionHeight))
                 }
             }
             DispatchQueue.main.async {
-                completion(_image)
+                if let cell = info.cell as? BackgroundModifierImageCell {
+                    cell.image = _image
+                } else if let cell = info.cell as? TimelineImageCell {
+                    cell.imgView.image = _image
+                }
             }
+        }
+    }
+    
+    func imageUnableToDownload(info: ImageInfo) {
+        info.width = -1
+        imageInfoArray.removeAll { (info) -> Bool in
+            return info.width < 0
         }
     }
     
@@ -124,4 +135,14 @@ class FileSystemOperator {
             imageInfo.write(toFile: self.imagePList as String, atomically: false)
         }
     }
+}
+
+extension UIImage {
+    
+    func resize(targetSize: CGSize) -> UIImage {
+        return UIGraphicsImageRenderer(size:targetSize).image { _ in
+            self.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+    }
+    
 }

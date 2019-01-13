@@ -32,7 +32,7 @@ class customNavBar: UINavigationBar {
             } else {
                 //center the buttons vertically
                 subview.frame = CGRect(x: subview.frame.origin.x, y: (self.frame.height - subview.frame.height) / 2.0, width: subview.frame.width, height: subview.frame.height)
-                self.titleTextAttributes = [.font: UIFont(name: "AvenirNext-Regular", size: ((UIScreen.main.traitCollection.verticalSizeClass == .regular) ? 30 : 20))!, .foregroundColor: UIColor.darkGray]
+                self.titleTextAttributes = [.font: UIFont(name: "AvenirNext-Regular", size: ((UIScreen.main.traitCollection.verticalSizeClass == .regular) ? 30 : 18))!, .foregroundColor: UIColor.darkGray]
             }
         }
     }

@@ -12,7 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PeriodStick" customModule="Timeline" customModuleProvider="target">
             <connections>
-                <outlet property="arrow" destination="uH3-tF-yOr" id="Jz3-fG-4ZG"/>
+                <outlet property="arrow" destination="uH3-tF-yOr" id="HTp-Qs-x7N"/>
                 <outlet property="arrowContainer" destination="ecE-ty-CR0" id="COy-vI-N72"/>
                 <outlet property="arrowStackView" destination="cBS-gx-Dhb" id="DPI-2v-IgR"/>
                 <outlet property="arrowSubStack" destination="G3C-rJ-r4f" id="fws-Iq-veW"/>
@@ -30,20 +30,24 @@
                     <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ecE-ty-CR0">
-                            <rect key="frame" x="0.0" y="0.0" width="375" height="85"/>
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="77"/>
                             <subviews>
                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="G3C-rJ-r4f">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="85"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="77"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6eo-19-3rj">
-                                            <rect key="frame" x="0.0" y="0.0" width="187.5" height="85"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="187.5" height="77"/>
                                             <viewLayoutGuide key="safeArea" id="wrX-N3-kK1"/>
                                         </view>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uH3-tF-yOr" customClass="Arrow" customModule="Timeline" customModuleProvider="target">
-                                            <rect key="frame" x="187.5" y="0.0" width="187.5" height="85"/>
+                                            <rect key="frame" x="187.5" y="0.0" width="187.5" height="77"/>
                                             <viewLayoutGuide key="safeArea" id="FYo-M8-n4d"/>
                                         </view>
                                     </subviews>
+                                    <constraints>
+                                        <constraint firstItem="uH3-tF-yOr" firstAttribute="top" secondItem="G3C-rJ-r4f" secondAttribute="top" id="JxR-aZ-wNO"/>
+                                        <constraint firstItem="uH3-tF-yOr" firstAttribute="leading" secondItem="6eo-19-3rj" secondAttribute="trailing" id="g1f-x8-mWd"/>
+                                    </constraints>
                                     <viewLayoutGuide key="safeArea" id="6pc-r1-1hQ"/>
                                 </stackView>
                             </subviews>
@@ -55,10 +59,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rQf-sf-nuX">
-                            <rect key="frame" x="0.0" y="85" width="375" height="567"/>
+                            <rect key="frame" x="0.0" y="77" width="375" height="567"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WLG-qC-cOb">
-                                    <rect key="frame" x="183.5" y="0.0" width="8" height="567"/>
+                                    <rect key="frame" x="183.5" y="-8" width="8" height="583"/>
                                     <color key="backgroundColor" white="0.68766276039999996" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
                                         <constraint firstAttribute="width" constant="8" id="Vcq-58-IzF"/>
@@ -67,15 +71,15 @@
                             </subviews>
                             <constraints>
                                 <constraint firstItem="WLG-qC-cOb" firstAttribute="centerX" secondItem="rQf-sf-nuX" secondAttribute="centerX" id="HCM-YS-7re"/>
-                                <constraint firstItem="WLG-qC-cOb" firstAttribute="top" secondItem="rQf-sf-nuX" secondAttribute="top" id="IeT-cB-zmd"/>
-                                <constraint firstItem="faP-3f-aSD" firstAttribute="bottom" secondItem="WLG-qC-cOb" secondAttribute="bottom" id="J8p-Nd-TrH"/>
+                                <constraint firstItem="WLG-qC-cOb" firstAttribute="top" secondItem="rQf-sf-nuX" secondAttribute="top" constant="-8" id="IeT-cB-zmd"/>
+                                <constraint firstItem="faP-3f-aSD" firstAttribute="bottom" secondItem="WLG-qC-cOb" secondAttribute="bottom" constant="-8" id="J8p-Nd-TrH"/>
                             </constraints>
                             <viewLayoutGuide key="safeArea" id="faP-3f-aSD"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9KA-fR-mlB">
-                            <rect key="frame" x="0.0" y="652" width="375" height="15"/>
+                            <rect key="frame" x="0.0" y="644" width="375" height="23"/>
                             <constraints>
-                                <constraint firstAttribute="height" constant="15" id="GAM-YC-YSf"/>
+                                <constraint firstAttribute="height" constant="23" id="GAM-YC-YSf"/>
                             </constraints>
                             <viewLayoutGuide key="safeArea" id="nfM-0J-b5z"/>
                         </view>
@@ -83,12 +87,24 @@
                     <constraints>
                         <constraint firstItem="rQf-sf-nuX" firstAttribute="height" secondItem="cBS-gx-Dhb" secondAttribute="height" multiplier="0.85" id="Czj-rR-N0B"/>
                         <constraint firstItem="rQf-sf-nuX" firstAttribute="leading" secondItem="cBS-gx-Dhb" secondAttribute="leading" id="IMx-tV-zhV"/>
+                        <constraint firstItem="rQf-sf-nuX" firstAttribute="height" secondItem="cBS-gx-Dhb" secondAttribute="height" multiplier="0.5" id="KCY-mn-Zn1"/>
                         <constraint firstItem="9KA-fR-mlB" firstAttribute="leading" secondItem="cBS-gx-Dhb" secondAttribute="leading" id="Q6h-Ml-sHL"/>
                         <constraint firstItem="ecE-ty-CR0" firstAttribute="leading" secondItem="cBS-gx-Dhb" secondAttribute="leading" id="bk2-xl-IJt"/>
                         <constraint firstAttribute="trailing" secondItem="9KA-fR-mlB" secondAttribute="trailing" id="cX5-l1-14N"/>
                         <constraint firstAttribute="trailing" secondItem="ecE-ty-CR0" secondAttribute="trailing" id="sDj-D3-AGx"/>
                         <constraint firstAttribute="trailing" secondItem="rQf-sf-nuX" secondAttribute="trailing" id="xdq-FL-GdW"/>
                     </constraints>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="KCY-mn-Zn1"/>
+                        </mask>
+                    </variation>
+                    <variation key="heightClass=compact">
+                        <mask key="constraints">
+                            <exclude reference="Czj-rR-N0B"/>
+                            <include reference="KCY-mn-Zn1"/>
+                        </mask>
+                    </variation>
                 </stackView>
             </subviews>
             <constraints>

@@ -17,13 +17,12 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     @IBOutlet weak var containerLeadingMargin: NSLayoutConstraint!
     @IBOutlet weak var containerTrailingMargin: NSLayoutConstraint!
     
-    @IBOutlet weak var collectionLeadingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var collectionTrailingConstraint: NSLayoutConstraint!
-    
     weak var layout: TitleScrnLayout!
     var timelineNames: Results<Timeline>?
     var loadingIndex = -1
-    var names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "j", "K", "l", "m", "N", "O", "P", "q", "R", "s", "t"]
+    //used for orientation
+    var sizeClass: UIUserInterfaceSizeClass!
+//    var names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "j", "K", "l", "m", "N", "O", "P", "q", "R", "s", "t"]
 
     struct TimelineArgs {
         var mode: Int
@@ -41,12 +40,13 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
         self.navigationController?.delegate = self
         collectionView.dataSource = self
         collectionView.delegate = self
+
+        sizeClass = self.view.traitCollection.verticalSizeClass
         if let layout = collectionView?.collectionViewLayout as? TitleScrnLayout {
             self.layout = layout
             self.layout.delegate = self
-            self.layout.sizeClass = self.view.traitCollection.verticalSizeClass
+            self.layout.sizeClass = sizeClass
         }
-        
         //Obtain all timeline names from the database, and sort them chronologically
         let realm = try! Realm()
         timelineNames = realm.objects(Timeline.self)
@@ -57,7 +57,6 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
         lpgr.delaysTouchesBegan = true
         lpgr.delegate = self
         collectionView.addGestureRecognizer(lpgr)
-
     }
 
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
@@ -66,26 +65,23 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
             loadingIndex = -1
         }
     }
-
     
     func updateCollectionWidth(newWidth: CGFloat) {
         //set the timeline visual length dependent on the number of collectionview objects.
-        if newWidth < (view.bounds.width - CGFloat(2 * TITLE_TIMELINE_PADDING)) {
+        let padding = (sizeClass == .regular) ? TITLE_TIMELINE_PADDING : TITLE_TIMELINE_PADDING_COMPACT
+        if newWidth < (view.bounds.width - CGFloat(2 * padding)) {
             containerLeadingMargin.constant = ((view.bounds.width - newWidth) / 2) - view.layoutMargins.left
             containerTrailingMargin.constant = ((view.bounds.width - newWidth) / 2) - view.layoutMargins.right
             collectionView.isScrollEnabled = false
         } else {
-            let padding = (self.view.traitCollection.verticalSizeClass == .regular) ? TITLE_TIMELINE_PADDING : TITLE_TIMELINE_PADDING_COMPACT
             containerLeadingMargin.constant = padding
             containerTrailingMargin.constant = padding
             collectionView.isScrollEnabled = true
             DispatchQueue.main.async {
                 self.collectionView.scrollToItem(at: IndexPath(item: (self.timelineNames!.count), section: 0), at: .right, animated: false)
-
             }
         }
     }
-    
     
     //////////////////COLLECTIONVIEW METHODS
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -94,14 +90,14 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return names.count + 1
+        return timelineNames!.count + 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "titleCell", for: indexPath) as? TitleScreenCell {
-            let isTopRow = (indexPath.item % 2 == 0) || (self.view.traitCollection.verticalSizeClass == .compact)
+            let isTopRow = (indexPath.item % 2 == 0) || (sizeClass == .compact)
             //Configure collectionview cells to appear as timeline objects. Last index has a special configuration to say "New Timeline"
-            let title = (indexPath.item < names.count) ? names[indexPath.item] : "New Timeline"
+            let title = (indexPath.item < timelineNames!.count) ? timelineNames![indexPath.item].name : "New Timeline"
             cell.configure(isTopRow: isTopRow, title: title, isLoading: indexPath.item == loadingIndex)
             cell.layoutIfNeeded()
             return cell
@@ -169,7 +165,6 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
                     editorVC.requiresEdits = args.requiresEdits!
                 }
                 editorVC.titleDelegate = self
-                editorVC.titleScreen = self
             }
         } else if segue.identifier == "titleScrnToTimeline" {
             if let timelineVC = segue.destination as? TimelineVC {
@@ -180,7 +175,7 @@ class TitleScreenVC: UIViewController, UICollectionViewDataSource, UICollectionV
             }
         }
     }
-    
+
     func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
         if viewController is TimelineEditorVC || viewController is TimelineVC {
             if let cell = collectionView.cellForItem(at: IndexPath(item: loadingIndex, section: 0)) as? TitleScreenCell {

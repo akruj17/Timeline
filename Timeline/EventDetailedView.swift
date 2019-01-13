@@ -36,10 +36,9 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
     private var secondLastYear: Int? = nil
     var layoutIndex: Int = -1
     //FOR SAVING UPDATED DATA
-    weak var delegate : EditorDataSaveDelegate!
+    var delegate : EditorDataSaveDelegate!
     //COMPLETION HANDLER
-    var completion : ((String, String, UIView) -> ())!
-    
+    var completion : ((String, String, UIView) -> ())!    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -55,8 +54,10 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
         Bundle.main.loadNibNamed("EventDetailedView", owner: self, options: nil)
         //some layout setup
         containerMinusBlur.layer.borderColor = UIColor.lightGray.cgColor
-        containerMinusBlur.layer.borderWidth = TEXT_FIELD_BORDER
-        containerMinusBlur.layer.cornerRadius = TEXT_FIELD_RADIUS
+        if self.traitCollection.verticalSizeClass == .regular {
+            containerMinusBlur.layer.borderWidth = TEXT_FIELD_BORDER
+            containerMinusBlur.layer.cornerRadius = TEXT_FIELD_RADIUS
+        }
         overviewContainer.layer.borderWidth = TEXT_FIELD_BORDER
         overviewContainer.layer.cornerRadius = TEXT_FIELD_RADIUS
         detailedContainer.layer.borderWidth = TEXT_FIELD_BORDER
@@ -170,11 +171,16 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
     
 //////TEXT FIELD DELEGATE METHODS
     func textViewDidBeginEditing(_ textView: UITextView) {
+        delegate.setActiveTextField(textField: textView)
         if textView.textColor == UIColor.lightGray {
             // the placeholder text should be removed
             textView.text = nil
             textView.textColor = UIColor.black
         }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate.setActiveTextField(textField: textField)
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -185,6 +191,11 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
             textView.text = EVENT_DETAILED_PLACEHOLDER
             textView.textColor = UIColor.lightGray
         }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
@@ -232,6 +243,14 @@ class EventDetailedView: UIView, UITextViewDelegate, UITextFieldDelegate {
                 result = newLength <= 5
             }
             return result
+        }
+        return true
+    }
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            return false
         }
         return true
     }

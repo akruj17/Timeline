@@ -20,4 +20,5 @@ class TitleScreenCell: UICollectionViewCell {
     func setLoading(isLoading: Bool) {
         titleBox.isLoading = isLoading
     }
+    
 }

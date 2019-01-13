@@ -23,7 +23,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var doneButton: UIBarButtonItem!
     
     var fileSystemOperator: FileSystemOperator!
-    weak var delegate: BackgroundModifierDelegate!
+    var delegate: BackgroundModifierDelegate!
     
     //keep track of both my collection view and regular timeline height
     var editorHeight: CGFloat!
@@ -42,16 +42,22 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             return selectedIndices.count
         }
     }
-    var updateIndex = 0
+    var updateIndex = 0 // the index to start invalidating image cells for timeline layout
+    var maxPossibleIndex = 0 //upper bound on updateIndex, we can't invalidate past the number of cells when this VC was opened
     var insertionIndex = 0
     var semaphore = 0   //hehe lame, but used for keeping track of color completions
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //initialize layout
-        contentView.layer.borderColor = UIColor.lightGray.cgColor
-        contentView.layer.borderWidth = TEXT_FIELD_BORDER
-        contentView.layer.cornerRadius = TEXT_FIELD_RADIUS
+        if self.traitCollection.verticalSizeClass == .regular {
+            contentView.layer.borderColor = UIColor.lightGray.cgColor
+            contentView.layer.borderWidth = TEXT_FIELD_BORDER
+            contentView.layer.cornerRadius = TEXT_FIELD_RADIUS
+        }
+        collectionView.layer.borderColor = UIColor.lightGray.cgColor
+        collectionView.layer.borderWidth = TEXT_FIELD_BORDER
+        collectionView.layer.cornerRadius = TEXT_FIELD_RADIUS
         //set up collectionview
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -68,6 +74,7 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     
     override func viewWillAppear(_ animated: Bool) {
         updateIndex = fileSystemOperator.imageInfoArray.count
+        maxPossibleIndex = updateIndex
     }
     
 ////// IB ACTION METHODS
@@ -101,7 +108,8 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     @IBAction func donePressed(_ sender: Any) {
-        delegate.backgroundModifierDonePressed(updateAt: updateIndex)
+        let startIndex = updateIndex < maxPossibleIndex ? updateIndex : maxPossibleIndex
+        delegate.backgroundModifierDonePressed(updateAt: startIndex)
         fileSystemOperator.saveMetadata()
     }
 
@@ -132,12 +140,15 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             tempIndices.append(fileSystemOperator.imageInfoArray[indexPath.item])
             updateIndex = indexPath.item < updateIndex ? indexPath.item : updateIndex
             //use to identify invalid indices
-            fileSystemOperator.imageInfoArray[indexPath.item].width = -1
+            fileSystemOperator.imageInfoArray[indexPath.item].width *= -1
         }
         fileSystemOperator.imageInfoArray = fileSystemOperator.imageInfoArray.filter { (info) -> Bool in
-            return info.width != -1
+            return info.width > 0
         }
-        
+        //now revert back the negative widths
+        for info in tempIndices {
+            info.width *= -1
+        }
         if updateType == .MOVE_FRONT {
             fileSystemOperator.imageInfoArray.insert(contentsOf: tempIndices, at: 0)
             updateIndex = 0
@@ -170,35 +181,42 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        print("------\(fileSystemOperator.imageInfoArray.count)")
         return fileSystemOperator.imageInfoArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? BackgroundModifierImageCell {
-            fileSystemOperator.retrieveImage(named: fileSystemOperator.imageInfoArray[indexPath.item].name, width: fileSystemOperator.imageInfoArray[indexPath.item].scaledWidth) { (image) in
-                cell.image = image
-            }
+            fileSystemOperator.imageInfoArray[indexPath.item].cell = cell
+            fileSystemOperator.retrieveImage(index: indexPath.item, widthType: .SCALED)
             cell.didSelect = selectedImages[indexPath.item]
-//            cell.layer.zPosition = 100
             return cell
         }
         return UICollectionViewCell()
     }
     
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.item < fileSystemOperator.imageInfoArray.count {
+            fileSystemOperator.imageInfoArray[indexPath.item].cell = nil
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let cell = collectionView.cellForItem(at: indexPath) as? BackgroundModifierImageCell {
-            cell.didSelect = !cell.didSelect
-            selectedImages[indexPath.item] = !selectedImages[indexPath.item]
-            if cell.didSelect {
-                selectedIndices.append(indexPath)
-            } else {
-                selectedIndices.remove(at: selectedIndices.index(of: indexPath)!)
+            if cell.image != nil {
+                cell.didSelect = !cell.didSelect
+                selectedImages[indexPath.item] = !selectedImages[indexPath.item]
+                if cell.didSelect {
+                    selectedIndices.append(indexPath)
+                } else {
+                    selectedIndices.remove(at: selectedIndices.index(of: indexPath)!)
+                }
+                if (selectedIndices.count == 0) {
+                    lblMessage.text = "Hold and drag to reorder images"
+                    lblMessage.textColor = UIColor.darkGray
+                }
+                setEnabledButtons()
             }
-            if (selectedIndices.count == 0) {
-                lblMessage.text = "Hold and drag to reorder images"
-                lblMessage.textColor = UIColor.darkGray
-            }
-            setEnabledButtons()
         }
     }
     
@@ -261,34 +279,55 @@ class BackgroundModifierVC: UIViewController, UICollectionViewDataSource, UIColl
             deselect: nil,
             cancel: nil,
             finish: {[unowned self](assets) in
-                let photoManager = PHImageManager.default()
-                let options = PHImageRequestOptions()
-                options.isSynchronous = true
-                let dispatch_group = DispatchGroup()
-                for _ in 0 ..< assets.count {
-                    dispatch_group.enter()
-                }
-                self.doneButton.isEnabled = false   //do not let the user leave during this delicate time
-                autoreleasepool {
-                    for (index, asset) in assets.enumerated() {
-                        photoManager.requestImage(for: asset, targetSize: CGSize(width: CGFloat(asset.pixelWidth), height: CGFloat(asset.pixelHeight)), contentMode: .aspectFit, options: options, resultHandler:
-                            {[unowned self] (result, info) in
-                                if let image = result {
-                                    self.fileSystemOperator.saveImage(image: image, index: self.insertionIndex + index, dispatch_group: dispatch_group)
-                                    self.selectedImages.append(false)
+                self.imagePickerFinished(assets: assets)
+            }, completion: nil)
+    }
+    
+    func imagePickerFinished(assets: [PHAsset]) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let photoManager = PHImageManager.default()
+            var imageTokens = [ImageInfo]()
+            var indices = [IndexPath]()
+            for (index, asset) in assets.enumerated() {
+                let size = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+                let imageToken = self.fileSystemOperator.prepareForImage(size: size, index: self.insertionIndex + index)
+                self.selectedImages.append(false)
+                imageTokens.append(imageToken)
+                indices.append(IndexPath(item: self.insertionIndex + index, section: 0))
+            }
+            self.fileSystemOperator.saveMetadata()
+            DispatchQueue.main.async {
+                self.collectionView.performBatchUpdates({
+                    self.collectionView.insertItems(at: indices)
+                }, completion: { (unused) in
+                    //now actually download and save the photos
+                    DispatchQueue.global(qos: .background).async {
+                        for (index, asset) in assets.enumerated() {
+                            let options = PHImageRequestOptions()
+                            options.isNetworkAccessAllowed = true
+                            options.isSynchronous = true
+                            options.progressHandler = {(progress: Double, error: Error?, stop: UnsafeMutablePointer<ObjCBool>, info: [AnyHashable : Any]?) -> Void in
+                                if error != nil {
+                                    // probably no internet connection, just cancel the download and warn the user
+                                    stop.pointee = true
+                                    self.fileSystemOperator.imageUnableToDownload(info: imageTokens[index])
+                                    DispatchQueue.main.async {
+                                        let incompleteAlert = UIAlertController(title: "There was a problem downloading one of the selected images", message: nil, preferredStyle: .alert)
+                                        incompleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                                        self.present(incompleteAlert, animated: true, completion: self.collectionView.reloadData)
+                                    }
+                                }
+                            }
+                            photoManager.requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (image, info) in
+                                guard let _info = info, let number = _info["PHImageResultIsDegradedKey"] as? NSNumber  else { return }
+                                if image != nil && number == 0 {    //we got the full quality image
+                                    self.fileSystemOperator.saveImage(image: image!, info: imageTokens[index])
                                 }
                             })
+                        }
                     }
-                }
-                    DispatchQueue.main.async {
-                        self.reloadLayout()
-                    }
-                    dispatch_group.notify(queue: DispatchQueue.main, work: DispatchWorkItem {
-                        //now all the colors have been loaded from this particular transaction
-                        self.reloadLayout()
-                        self.doneButton.isEnabled = true
-                        self.fileSystemOperator.saveMetadata()
-                    })
-            }, completion: nil)
+                })
+            }
+        }
     }
 }

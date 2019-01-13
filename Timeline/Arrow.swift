@@ -10,9 +10,11 @@ import UIKit
 
 class Arrow: UIView {
     
-    let tail = UIView()
-    let head1 = UIView()
-    let head2 = UIView()
+    @IBOutlet var contentView: UIView!
+    @IBOutlet weak var tail: UIView!
+    @IBOutlet weak var head1: UIView!
+    @IBOutlet weak var head2: UIView!
+    
     
     var _pointsRight = false
     var _isTop = true
@@ -29,16 +31,14 @@ class Arrow: UIView {
     }
     
     func commonInit() {
-        tail.frame = CGRect(x: -1 * (PERIOD_CELL_BORDER / 2), y: (frame.height / 2) - (PERIOD_CELL_BORDER / 2), width: frame.width, height: PERIOD_CELL_BORDER)
-        let rotationAngle: CGFloat = .pi * (30.0 / 180.0)
-        let headLength = ((frame.height - PERIOD_CELL_BORDER) / 2) / sin(rotationAngle)
-        head1.frame = CGRect(x: tail.frame.maxX - (cos(rotationAngle) * (headLength / 2)) - (headLength / 2), y: tail.frame.minY - ((headLength / 2) * sin(rotationAngle)), width: headLength, height: PERIOD_CELL_BORDER)
-        head2.frame = CGRect(x: tail.frame.maxX - (cos(-1 * rotationAngle) * (headLength / 2)) - (headLength / 2), y: tail.frame.minY + (sin(rotationAngle) * (headLength / 2)), width: headLength, height: PERIOD_CELL_BORDER)
-        head1.transform = CGAffineTransform(rotationAngle: rotationAngle)
-        head2.transform = CGAffineTransform(rotationAngle: -1 * rotationAngle)
-        self.addSubview(tail)
-        self.addSubview(head1)
-        self.addSubview(head2)
+        Bundle.main.loadNibNamed("Arrow", owner: self, options: nil)
+        addSubview(contentView)
+        contentView.frame = self.bounds
+        contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        head1.layer.anchorPoint = CGPoint(x: 1, y: 0.5)
+        head1.transform = CGAffineTransform(rotationAngle: .pi / 6)
+        head2.layer.anchorPoint = CGPoint(x: 1, y: 0.5)
+        head2.transform = CGAffineTransform(rotationAngle: .pi / -6)
     }
     
     override var tintColor: UIColor? {

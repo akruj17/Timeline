@@ -15,7 +15,7 @@ class TimelineLayout: UICollectionViewLayout {
     var contentHeight: CGFloat {
         return collectionView!.frame.height
     }
-
+    var sizeClass: UIUserInterfaceSizeClass!
     var imageCache = [UICollectionViewLayoutAttributes]()
     var eventCache = [UICollectionViewLayoutAttributes]()
     var periodStickCache = [UICollectionViewLayoutAttributes]()
@@ -36,14 +36,15 @@ class TimelineLayout: UICollectionViewLayout {
         }
         //Setup for events. eventXposCache and eventHeightCache should ALWAYS have same number of items
         if eventCache.count != collectionView!.numberOfItems(inSection: EVENT_SECTION) {
+            let rowHeight = (sizeClass == .regular) ? (contentHeight / CGFloat(2)) - (TIMELINE_LINE_HEIGHT / 2) : contentHeight - 20 - TIMELINE_LINE_HEIGHT
             //This is actually the event cell width plus end padding
             let eventCellWidth = contentHeight * 0.8
-            let eventCellHeight = contentHeight * 0.3
+            let eventCellHeight = (sizeClass == . regular) ? contentHeight * 0.3 : contentHeight * 0.65
             let periodTopRowYOffset = 0.1 * contentHeight
             
             var xOffset: [CGFloat] = [TIMELINE_OFFSET, TIMELINE_OFFSET + (eventCellWidth / 2)]
             //for events, and periods on the top row
-            let yOffset = [(contentHeight / 2) - (TIMELINE_LINE_HEIGHT / 2) - eventCellHeight, (contentHeight / 2) + (TIMELINE_LINE_HEIGHT / 2)]
+            let yOffset = [rowHeight - eventCellHeight, rowHeight + (TIMELINE_LINE_HEIGHT / 2)]
             var row = 0
             
             if eventCache.isEmpty {
@@ -56,13 +57,17 @@ class TimelineLayout: UICollectionViewLayout {
                 //end point for last cell
                 eventContentWidth = (eventCache.last == nil) ? TIMELINE_OFFSET : eventCache.last!.frame.minX + eventCellWidth
                 //end point for second to last cell, and where the first new cell will placed
-                let startPoint = (eventCache.count <= 1) ? xOffset[eventCache.count] : eventCache[eventCache.count - 2].frame.minX + eventCellWidth
-                if eventCache.count % 2 == 0 {
-                    //the next cell put down will be on the top row
-                    xOffset = [startPoint, eventContentWidth]
-                } else {
-                    xOffset = [eventContentWidth, startPoint]
-                    row = 1
+                if sizeClass == .regular {  //IPAD
+                    let startPoint = (eventCache.count <= 1) ? xOffset[eventCache.count] : eventCache[eventCache.count - 2].frame.minX + eventCellWidth
+                    if eventCache.count % 2 == 0 {
+                        //the next cell put down will be on the top row
+                        xOffset = [startPoint, eventContentWidth]
+                    } else {
+                        xOffset = [eventContentWidth, startPoint]
+                        row = 1
+                    }
+                } else if sizeClass == .compact {   //IPHONE
+                    xOffset[0] = (eventCache.count == 0) ? xOffset[eventCache.count] : eventCache[eventCache.count - 1].frame.minX + eventCellWidth
                 }
             }
             
@@ -75,10 +80,11 @@ class TimelineLayout: UICollectionViewLayout {
                 eventCache.append(eventAttributes)
                 //add attributes for the period stick
                 let stickAttributes = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: item, section: PERIOD_STICK_SECTION))
-                stickAttributes.frame = CGRect(x: xOffset[row], y: row % 2 == 1 ? periodTopRowYOffset : yOffset[1], width: 0.7 * eventCellWidth, height: 0.4 * contentHeight)
+                let yPos = (sizeClass == .regular) ? (row % 2 == 1 ? periodTopRowYOffset : yOffset[1]) : yOffset[0] - (0.3 * contentHeight) + 15
+                stickAttributes.frame = CGRect(x: xOffset[row], y: yPos , width: 0.7 * eventCellWidth, height: (sizeClass == .regular) ? 0.4 * contentHeight : 0.3 * contentHeight)
                 periodStickCache.append(stickAttributes)
                 xOffset[row] += eventCellWidth
-                row = (row + 1) > 1 ? 0: 1
+                row = ((row + 1) > 1) || (sizeClass == .compact) ? 0: 1
             }
             eventContentWidth = max(xOffset[0], xOffset[1])
         }

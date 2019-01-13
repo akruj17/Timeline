@@ -21,6 +21,7 @@ class TitleScrnLayout: UICollectionViewLayout {
     weak var delegate: TitleCollectionDelegate!
 
     override func prepare() {
+
         //this method should only execute if the layout has not been setup, OR if a title cell was added or removed
         if cache.count != collectionView!.numberOfItems(inSection: 0) {
             //The height of each row, which accounts for the central line which is 5 pixels tall
@@ -71,7 +72,7 @@ class TitleScrnLayout: UICollectionViewLayout {
             }
             //now add "new timeline" cell
             let new_timeline_cell = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: cache.count, section: 0))
-            new_timeline_cell.frame = CGRect(x: xOffset[row], y: (cache.count % 2 == 0) ? 0 : yOffset[row], width: 0.7 * rowHeight, height: rowHeight)
+            new_timeline_cell.frame = CGRect(x: xOffset[row], y: (cache.count % 2 == 0 || sizeClass == .compact) ? 0 : yOffset[row], width: 0.7 * rowHeight, height: rowHeight)
             xOffset[row] += (0.7 * rowHeight)
             cache.append(new_timeline_cell)
             //update contentWidth
@@ -83,6 +84,7 @@ class TitleScrnLayout: UICollectionViewLayout {
     override var collectionViewContentSize: CGSize {
         return CGSize(width: contentWidth, height: contentHeight)
     }
+
     
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         var layoutAttributes = [UICollectionViewLayoutAttributes]()
@@ -106,5 +108,10 @@ class TitleScrnLayout: UICollectionViewLayout {
     
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return cache[indexPath.row]
+    }
+    
+    override func invalidateLayout() {
+        super.invalidateLayout()
+        cache.removeAll()
     }
 }

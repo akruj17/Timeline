@@ -16,6 +16,7 @@ protocol EditorDataSaveDelegate: class {
     func saveTimePeriod (isTimePeriod: Bool, index: Int)
     func saveYear (year: Int?, index: Int)
     func saveEndYear (year: Int?, index: Int)
+    func setActiveTextField(textField: UIView) //any because it could be a text field or text view
 }
 
 // communication protocol for (TimelineEditorVC && TimelineVC) -> TitleScreenVC

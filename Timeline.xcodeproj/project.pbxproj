@@ -29,6 +29,7 @@
 		A82D895A1F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */; };
 		A8641F521FCA711B00058F6F /* customNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8641F511FCA711B00058F6F /* customNavBar.swift */; };
 		A86790F11F7C65F700F025F4 /* RealmOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86790F01F7C65F700F025F4 /* RealmOperator.swift */; };
+		A87831B921E7F25000180EBB /* Arrow.xib in Resources */ = {isa = PBXBuildFile; fileRef = A87831B821E7F25000180EBB /* Arrow.xib */; };
 		A881025A1FD32D39004045EB /* TitleScreenCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88102591FD32D39004045EB /* TitleScreenCell.swift */; };
 		A8896D3B1F197D4500D62C0F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8896D3A1F197D4500D62C0F /* Event.swift */; };
 		A88F78B220106164006F1EE1 /* Arrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88F78B120106164006F1EE1 /* Arrow.swift */; };
@@ -71,6 +72,7 @@
 		A82D89591F0DDE4D00F769D7 /* TimelineTitleEditorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineTitleEditorCell.swift; sourceTree = "<group>"; };
 		A8641F511FCA711B00058F6F /* customNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customNavBar.swift; sourceTree = "<group>"; };
 		A86790F01F7C65F700F025F4 /* RealmOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmOperator.swift; sourceTree = "<group>"; };
+		A87831B821E7F25000180EBB /* Arrow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = Arrow.xib; sourceTree = "<group>"; };
 		A88102591FD32D39004045EB /* TitleScreenCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScreenCell.swift; sourceTree = "<group>"; };
 		A8896D3A1F197D4500D62C0F /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		A88F78B120106164006F1EE1 /* Arrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arrow.swift; sourceTree = "<group>"; };
@@ -229,6 +231,7 @@
 				A8E8A7C821DD301F00378441 /* EventBox.swift */,
 				A8E8A7CC21DD4B1900378441 /* TitleBox.xib */,
 				A8E8A7CA21DD4B0800378441 /* TitleBox.swift */,
+				A87831B821E7F25000180EBB /* Arrow.xib */,
 				A88F78B120106164006F1EE1 /* Arrow.swift */,
 				A8EB962021E56B2500579C7E /* PeriodStick.xib */,
 				A8EB962221E56BC200579C7E /* PeriodStick.swift */,
@@ -312,6 +315,7 @@
 			files = (
 				A8231C0321D7FA6600663459 /* LoadingScreen.xib in Resources */,
 				A8EB962121E56B2600579C7E /* PeriodStick.xib in Resources */,
+				A87831B921E7F25000180EBB /* Arrow.xib in Resources */,
 				A81845691EF387C500F7BEFB /* LaunchScreen.storyboard in Resources */,
 				A8E8A7C721DD299B00378441 /* EventBox.xib in Resources */,
 				A8E8A7CD21DD4B1900378441 /* TitleBox.xib in Resources */,
@@ -551,7 +555,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3FL68T5VY9;
 				INFOPLIST_FILE = Timeline/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "edumacation-.Timeline";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -571,7 +575,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3FL68T5VY9;
 				INFOPLIST_FILE = Timeline/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "edumacation-.Timeline";
 				PRODUCT_NAME = "$(TARGET_NAME)";

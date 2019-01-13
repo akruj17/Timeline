@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDelegate, EditorDataSaveDelegate {
+class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDelegate, EditorDataSaveDelegate, UINavigationControllerDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var doneButton: UIBarButtonItem!
@@ -26,17 +26,14 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
     var doneEditing = false
     var requiresEdits = false
     var mode = NEW
-    weak var titleDelegate: CollectionReloadDelegate!
-    weak var titleScreen: TitleScreenVC!
+    var timelineIsDeleted = false
+    var titleDelegate: CollectionReloadDelegate!
+    var activeTextView: UIView? = nil //any because it could be a text field or text view
     
     override func viewDidLoad() {
+        print("my size is \(self.view.frame)")
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
-        if self.view.traitCollection.horizontalSizeClass == .regular {
-            AppUtility.lockOrientation(.all)
-        } else {
-            AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
-        }
         tableView.dataSource = self
         tableView.delegate = self
         //If the timeline is being created for the first time, fields should appear empty. Otherwise, fields should be filled with prior data from database.
@@ -60,12 +57,26 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                 editsTracker.append([false, false, false])
             }
         }
+        //add support for pushing view up when keyboard appears
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         tableView.reloadData()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if self.view.traitCollection.horizontalSizeClass == .regular {
+            AppUtility.lockOrientation(.allButUpsideDown)
+        } else {
+            AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
+    }
+
     
 /////IB ACTION METHODS
     
@@ -98,10 +109,12 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
                 //TIMELINE IS VALID
                 if self.mode == NEW {
                     self.titleDelegate.updateCollection(completion: nil)
-                } else if self.mode == MODIFY {
+                }
+                if self.mode == MODIFY {
                     self.navigationController?.popViewController(animated: true)
                     return
                 }
+//                AppUtility.lockOrientation(.landscape, andRotateTo: .landscapeLeft)
                 self.performSegue(withIdentifier: "editorToTimeline", sender: nil)
             }
         }
@@ -133,7 +146,10 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         incompleteAlert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: {[unowned self] action in
             //the user has confirmed they would like to delete the timeline
             RealmOperator.deleteTimeline(title: self.timelineTitle)
+            self.timelineIsDeleted = true
             self.titleDelegate.updateCollection(completion: { (unused) in
+                AppUtility.lockOrientation(.landscape, andRotateTo: .landscapeRight)
+                UIViewController.attemptRotationToDeviceOrientation()
                 self.navigationController?.popToRootViewController(animated: true)
             })
         }))
@@ -141,6 +157,7 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         incompleteAlert.title = "Are you sure you want to delete this timeline? This action cannot be undone later."
         self.present(incompleteAlert, animated: true, completion: nil)
     }
+
     
     
     
@@ -207,34 +224,44 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
 
 //////EDITOR DATA SAVE METHODS
     func saveTitle(title: String) {
-        realmOperator.persistTitle(title: title, sync: doneEditing)
-        // mark the title as invalid if it is
-        titleInvalid = title.replacingOccurrences(of: " ", with: "") == ""
+        if !timelineIsDeleted {
+            realmOperator.persistTitle(title: title, sync: doneEditing)
+            // mark the title as invalid if it is
+            titleInvalid = title.replacingOccurrences(of: " ", with: "") == ""
+        }
     }
     
     func saveYear(year: Int?, index: Int) {
-        let event = eventInfoArray[index]
-        realmOperator.persistEventField(event: event, field: year, type: EventInfo.START_YEAR, sync: doneEditing)
-        editsTracker[index][START_YEAR_INDEX] = (year == nil)
+        if !timelineIsDeleted {
+            let event = eventInfoArray[index]
+            realmOperator.persistEventField(event: event, field: year, type: EventInfo.START_YEAR, sync: doneEditing)
+            editsTracker[index][START_YEAR_INDEX] = (year == nil)
+        }
     }
     
     func saveOverview(overview: String, index: Int) {
-        let event = eventInfoArray[index]
-        realmOperator.persistEventField(event: event, field: overview, type: EventInfo.OVERVIEW, sync: doneEditing)
-        editsTracker[index][OVERVIEW_INDEX] = overview.replacingOccurrences(of: " ", with: "") == ""
+        if !timelineIsDeleted {
+            let event = eventInfoArray[index]
+            realmOperator.persistEventField(event: event, field: overview, type: EventInfo.OVERVIEW, sync: doneEditing)
+            editsTracker[index][OVERVIEW_INDEX] = overview.replacingOccurrences(of: " ", with: "") == ""
+        }
     }
     
     func saveDetailed(detailed: String, index: Int) {
-        let event = eventInfoArray[index]
-        realmOperator.persistEventField(event: event, field: detailed, type: EventInfo.DETAILED, sync: doneEditing)
+        if !timelineIsDeleted {
+            let event = eventInfoArray[index]
+            realmOperator.persistEventField(event: event, field: detailed, type: EventInfo.DETAILED, sync: doneEditing)
+        }
     }
     
     func saveTimePeriod(isTimePeriod: Bool, index: Int) {
-        let event = eventInfoArray[index]
-        realmOperator.persistEventField(event: event, field: isTimePeriod, type: EventInfo.TIME_PERIOD, sync: doneEditing)
-        // if no longer a time period, turn off edits for end year
-        if !isTimePeriod {
-            editsTracker[index][END_YEAR_INDEX] = false
+        if !timelineIsDeleted {
+            let event = eventInfoArray[index]
+            realmOperator.persistEventField(event: event, field: isTimePeriod, type: EventInfo.TIME_PERIOD, sync: doneEditing)
+            // if no longer a time period, turn off edits for end year
+            if !isTimePeriod {
+                editsTracker[index][END_YEAR_INDEX] = false
+            }
         }
     }
     
@@ -244,6 +271,11 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         editsTracker[index][END_YEAR_INDEX] = (year == nil)
     }
     
+    func setActiveTextField(textField: UIView) {
+        self.activeTextView = textField
+    }
+    
+
     
 //////HELPER METHODS
     
@@ -255,7 +287,6 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
             eventInfoArray.append(event)
             indexPaths.append(IndexPath(row: eventInfoArray.count - 1, section: 1))
             editsTracker.append([false, false, false])
-            realmOperator.persistEventField(event: event, field: nil, type: .DEFAULT, sync: false)
         }
         tableView.reloadData()
     }
@@ -303,9 +334,24 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         }
     }
     
-    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        if viewController is TimelineVC {
-            self.dismiss(animated: false, completion: nil)
+//HANDLING KEYBOARD
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if let textField = activeTextView {
+                let pos = textField.convert(textField.frame.origin, to: view)
+                if (pos.y + textField.frame.height) >= (self.view.frame.height - keyboardSize.height) {
+                    //then shift the VC up
+                    if self.view.frame.origin.y == 0 {
+                        self.view.frame.origin.y -= keyboardSize.height
+                    }
+                }
+            }
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        if self.view.frame.origin.y != 0 {
+            self.view.frame.origin.y = 0
         }
     }
     
@@ -313,6 +359,5 @@ class TimelineEditorVC: UIViewController, UITableViewDataSource, UITableViewDele
         super.viewWillDisappear(animated)
         
         // Don't forget to reset when view is being removed
-        AppUtility.lockOrientation(.landscape)
     }
 }

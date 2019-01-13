@@ -12,8 +12,8 @@ class TimelineEventBoxCell: UICollectionViewCell {
     
     @IBOutlet weak var eventBox: EventBox!
     
-    func configure(isTopRow: Bool, overview: String, color: UIColor, year: Int?) {
-        eventBox.configure(isTop: isTopRow, year: year, overview: overview, color: color)
+    func configure(isTopRow: Bool, overview: String, color: UIColor, year: Int?, eventType: EventType) {
+        eventBox.configure(isTop: isTopRow, year: year, overview: overview, color: color, eventType: eventType)
     }
     
 }

@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 
 class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, BackgroundModifierDelegate,  TimelineCollectionDelegate, EditorDataSaveDelegate {
-
+    
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var navBar: customNavBar!
     @IBOutlet weak var backgroundModifierContainer: UIView!
@@ -29,24 +29,28 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     var layout: TimelineLayout!
     weak var titleDelegate: CollectionReloadDelegate!
     var doneEditing: Bool = false
+    var activeTextView: UIView? = nil //any because it could be a text field or text view
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // should only be in landscape
+        if UIApplication.shared.statusBarOrientation != .landscapeLeft && UIApplication.shared.statusBarOrientation != .landscapeRight {
+            AppUtility.lockOrientation(.landscape, andRotateTo: .landscapeLeft)
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
         //assign delegates
         collectionView.dataSource = self
         collectionView.delegate = self
         if let layout = collectionView?.collectionViewLayout as? TimelineLayout {
             self.layout = layout
             self.layout.delegate = self
+            self.layout.sizeClass = self.view.traitCollection.verticalSizeClass
         }
         eventDetailedView.delegate = self
         assert(titleDelegate != nil)
         loadingScreen.isHidden = false
         let dispatch_group = DispatchGroup()
-        // should only be in landscape
-        if UIDevice.current.orientation != .landscapeLeft && UIDevice.current.orientation != .landscapeRight {
-            AppUtility.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-        }
+//        AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
         // these variables should be populated during segue
         assert(timeline != nil)
         realmOperator = RealmOperator(_timeline: timeline)
@@ -85,8 +89,8 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
                     self.present(incompleteAlert, animated: true, completion: nil)
                 } else {
                     self.eventsLayout.sort(by: {$0.year < $1.year})
+                    self.collectionView.reloadSections([PERIOD_STICK_SECTION, EVENT_SECTION])
                     self.collectionView.performBatchUpdates({
-                        self.collectionView.reloadSections([PERIOD_STICK_SECTION, EVENT_SECTION])
                     }, completion: { (b) in
                         view.isHidden = true
                     })
@@ -99,10 +103,18 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
             self.collectionView.reloadData()
             self.loadingScreen.isHidden = true
         })
+        //add support for pushing view up when keyboard appears
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
+        // should only be in landscape
+        if UIApplication.shared.statusBarOrientation != .landscapeLeft && UIApplication.shared.statusBarOrientation != .landscapeRight {
+            AppUtility.lockOrientation(.landscape, andRotateTo: .landscapeLeft)
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
         if needsLayout {
             setUpEventLayout()
             collectionView.reloadData()
@@ -127,7 +139,7 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
 /////IB ACTION METHODS
     
     @IBAction func backBtnPressed(_ sender: Any) {
-            self.navigationController?.popToRootViewController(animated: true)
+        self.navigationController?.popToRootViewController(animated: true)
     }
 
     
@@ -171,36 +183,46 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == IMAGE_SECTION {
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? TimelineImageCell {
-                fileSystemOperator.retrieveImage(named: fileSystemOperator.imageInfoArray[indexPath.item].name, width: ORIGINAL_WIDTH) { (image) in
-                    cell.imgView.image = image
-                }
+                fileSystemOperator.imageInfoArray[indexPath.item].cell = cell
+                fileSystemOperator.retrieveImage(index: indexPath.item, widthType: .ORIGINAL)
                 cell.layer.zPosition = 50
                 return cell
             }
-        } else if indexPath.section == EVENT_SECTION {
-            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "eventCell", for: indexPath) as? TimelineEventBoxCell {
-                let isTopRow = indexPath.item % 2 == 0
-                // firstYear will store whether the event is the first of its year, nil otherwise
-                let firstYear = (indexPath.item == 0 || (eventsLayout[indexPath.item].year > eventsLayout[indexPath.item - 1].year)) ? eventsLayout[indexPath.item].year : nil
-                let color = (indexPath.item < colorCache.count) ? colorCache[indexPath.item] : UIColor.gray
-                cell.configure(isTopRow: isTopRow, overview: eventsLayout[indexPath.item].event.overview, color: color, year: firstYear)
-                cell.layer.zPosition = 100
-                return cell
+        } else {
+            //either event or period stick
+            let isTopRow = indexPath.item % 2 == 0 || self.view.traitCollection.verticalSizeClass == .compact
+            let color = (indexPath.item < colorCache.count) ? colorCache[indexPath.item] : UIColor.gray
+            var eventType = EventType.REGULAR
+            if let period = eventsLayout[indexPath.item] as? Period {
+                eventType = period.isBeginning ? .BEGIN : .END
             }
-        } else if indexPath.section == PERIOD_STICK_SECTION {
-            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "periodCell", for: indexPath) as? PeriodStickCell {
-                let isTopRow = indexPath.item % 2 != 0
-                let color = (indexPath.item < colorCache.count) ? colorCache[indexPath.item] : UIColor.gray
-                if let period = eventsLayout[indexPath.item] as? Period {
-                    cell.configure(isTopRow: isTopRow, color: color, isBeginning: period.isBeginning)
-                    cell.isHidden = false
-                } else {
-                    cell.isHidden = true
+            if indexPath.section == EVENT_SECTION {
+                 if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "eventCell", for: indexPath) as? TimelineEventBoxCell {
+                    // firstYear will store whether the event is the first of its year, nil otherwise
+                    let firstYear = (indexPath.item == 0 || (eventsLayout[indexPath.item].year > eventsLayout[indexPath.item - 1].year)) ? eventsLayout[indexPath.item].year : nil
+                    cell.configure(isTopRow: isTopRow, overview: eventsLayout[indexPath.item].event.overview, color: color, year: firstYear, eventType: eventType)
+                    cell.layer.zPosition = 100
+                    return cell
                 }
-                return cell
+            } else if indexPath.section == PERIOD_STICK_SECTION {
+                if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "periodCell", for: indexPath) as? PeriodStickCell {
+                    if eventType != .REGULAR {
+                        cell.configure(isTopRow: !isTopRow || self.view.traitCollection.verticalSizeClass == .compact, color: color, isBeginning: eventType == .BEGIN)
+                        cell.isHidden = false
+                    } else {
+                        cell.isHidden = true
+                    }
+                    return cell
+                }
             }
         }
         return UICollectionViewCell()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.item < fileSystemOperator.imageInfoArray.count {
+            fileSystemOperator.imageInfoArray[indexPath.item].cell = nil
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -306,5 +328,30 @@ class TimelineVC: UIViewController, UICollectionViewDelegate, UICollectionViewDa
     func saveTimePeriod(isTimePeriod: Bool, index: Int) {
         //method not implemented
     }
+    
+    func setActiveTextField(textField: UIView) {
+        activeTextView = textField
+    }
+    
+//HANDLING KEYBOARD
+@objc func keyboardWillShow(notification: NSNotification) {
+    if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+        if let textField = activeTextView {
+            let pos = textField.convert(textField.frame.origin, to: view)
+            if (pos.y + textField.frame.height) >= (self.view.frame.height - keyboardSize.height) {
+                //then shift the VC up
+                if self.view.frame.origin.y == 0 {
+                    self.view.frame.origin.y -= (keyboardSize.height / 3.0)
+                }
+            }
+        }
+    }
+}
+
+@objc func keyboardWillHide(notification: NSNotification) {
+    if self.view.frame.origin.y != 0 {
+        self.view.frame.origin.y = 0
+    }
+}
 
 }

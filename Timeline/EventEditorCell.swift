@@ -22,7 +22,7 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     }
     
     var eventIndex: Int!
-    weak var delegate : EditorDataSaveDelegate!
+    var delegate : EditorDataSaveDelegate!
     let eventOverviewPlaceholder = "Enter a brief description of the event which will show up on the timeline. 70 chars max"
     let eventDetailedPlaceholder = "Enter a more detailed description of the event (Optional)"
     
@@ -41,6 +41,7 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
+        delegate.setActiveTextField(textField: textView)
         if textView.textColor == UIColor.lightGray {
             // the placeholder text should be removed
             textView.text = nil
@@ -53,6 +54,7 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate.setActiveTextField(textField: textField)
         if textField.layer.borderColor == UIColor.red.cgColor {
             //change red to gray borders when clicked
             textField.layer.borderColor = UIColor.darkGray.cgColor
@@ -78,6 +80,19 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
             textView.textColor = UIColor.lightGray
         }
     }
+
+//    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+//        if(text == "\n") {
+//            textView.resignFirstResponder()
+//            return false
+//        }
+//        return true
+//    }
+//
+    func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+        textView.resignFirstResponder()
+        return true
+    }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if  let text = textField.text {
@@ -99,7 +114,19 @@ class EventEditorCell: UITableViewCell, UITextViewDelegate, UITextFieldDelegate 
         }
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        //or
+        //self.view.endEditing(true)
+        return true
+    }
+    
+    
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            return false
+        }
         if textView == eventOverviewField {
             guard let box = textView.text else { return true }
             let newLength = box.count + text.count - range.length
